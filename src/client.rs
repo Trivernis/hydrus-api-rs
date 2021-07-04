@@ -7,7 +7,9 @@ use crate::paths::adding_files::{
     DeleteFilesResponse, UnarchiveFilesRequest, UnarchiveFilesResponse, UndeleteFilesRequest,
     UndeleteFilesResponse,
 };
+use crate::paths::adding_tags::{AddTagsRequest, AddTagsResponse, CleanTagsResponse};
 use crate::paths::Path;
+use crate::utils::string_list_to_json_array;
 use reqwest::Response;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
@@ -162,6 +164,20 @@ impl Client {
             hashes,
         })
         .await?;
+
+        Ok(())
+    }
+
+    /// Returns the list of tags as the client would see them in a human friendly order
+    pub async fn clean_tags(&mut self, tags: Vec<String>) -> Result<CleanTagsResponse> {
+        self.get_and_parse(&[("tags", string_list_to_json_array(tags))])
+            .await
+    }
+
+    /// Adds tags to files with the given hashes
+    pub async fn add_tags(&mut self, request: AddTagsRequest) -> Result<()> {
+        self.post::<AddTagsResponse, AddTagsRequest>(request)
+            .await?;
 
         Ok(())
     }
