@@ -1,0 +1,16 @@
+[package]
+name = "hydrus-api"
+version = "0.1.0"
+authors = ["trivernis <trivernis@protonmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+serde = "^1.0"
+serde_derive = "^1.0"
+reqwest = {version = "0.11.4", features = ["json"]}
+
+[dev-dependencies.tokio]
+version = "1.8.0"
+features = ["macros", "rt-multi-thread"]
