@@ -6,8 +6,9 @@ The official API documentation can be found [here](https://hydrusnetwork.github.
 ## Example
 
 ```rust
-
-use hydrus_api_rs::Client;
+use hydrus_api::Client;
+use hydrus_api::paths::adding_tags::{AddTagsRequestBuilder, TagAction};
+use std::env;
 
 #[tokio::main]
 async fn main() {
