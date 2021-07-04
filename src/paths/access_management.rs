@@ -2,7 +2,7 @@ use crate::paths::common::BasicServiceInfo;
 use crate::paths::Path;
 use std::collections::HashMap;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct ApiVersionResponse {
     pub version: u32,
     pub hydrus_version: u32,
@@ -14,7 +14,7 @@ impl Path for ApiVersionResponse {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct SessionKeyResponse {
     pub session_key: String,
 }
@@ -25,7 +25,7 @@ impl Path for SessionKeyResponse {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct VerifyAccessKeyResponse {
     pub basic_permissions: Vec<u32>,
     pub human_description: String,
@@ -37,7 +37,7 @@ impl Path for VerifyAccessKeyResponse {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct GetServicesResponse(pub HashMap<String, Vec<BasicServiceInfo>>);
 
 impl Path for GetServicesResponse {
