@@ -4,6 +4,7 @@ use serde::Serialize;
 pub mod access_management;
 pub mod adding_files;
 pub mod adding_tags;
+pub mod adding_urls;
 pub mod common;
 pub mod searching_and_fetching_files;
 

@@ -7,6 +7,10 @@ use crate::endpoints::adding_files::{
     DeleteFilesRequest, UnarchiveFiles, UnarchiveFilesRequest, UndeleteFiles, UndeleteFilesRequest,
 };
 use crate::endpoints::adding_tags::{AddTags, AddTagsRequest, CleanTags, CleanTagsResponse};
+use crate::endpoints::adding_urls::{
+    AddUrl, AddUrlRequest, AddUrlResponse, AssociateUrl, AssociateUrlRequest, GetUrlFiles,
+    GetUrlFilesResponse, GetUrlInfo, GetUrlInfoResponse,
+};
 use crate::endpoints::common::{FileIdentifier, FileRecord};
 use crate::endpoints::searching_and_fetching_files::{
     FileMetadata, FileMetadataResponse, FileSearchLocation, GetFile, SearchFiles,
@@ -240,5 +244,50 @@ impl Client {
         let bytes = response.bytes().await?.to_vec();
 
         Ok(FileRecord { bytes, mime_type })
+    }
+
+    /// Returns all files associated with the given url
+    pub async fn get_url_files<S: AsRef<str>>(&mut self, url: S) -> Result<GetUrlFilesResponse> {
+        self.get_and_parse::<GetUrlFiles, [(&str, &str)]>(&[("url", url.as_ref())])
+            .await
+    }
+
+    /// Returns information about the given url
+    pub async fn get_url_info<S: AsRef<str>>(&mut self, url: S) -> Result<GetUrlInfoResponse> {
+        self.get_and_parse::<GetUrlInfo, [(&str, &str)]>(&[("url", url.as_ref())])
+            .await
+    }
+
+    /// Adds an url to hydrus, optionally with additional tags and a destination page
+    pub async fn add_url(&mut self, request: AddUrlRequest) -> Result<AddUrlResponse> {
+        self.post_and_parse::<AddUrl>(request).await
+    }
+
+    /// Associates urls with the given file hashes
+    pub async fn associate_urls(&mut self, urls: Vec<String>, hashes: Vec<String>) -> Result<()> {
+        self.post::<AssociateUrl>(AssociateUrlRequest {
+            hashes,
+            urls_to_add: urls,
+            urls_to_delete: vec![],
+        })
+        .await?;
+
+        Ok(())
+    }
+
+    /// Disassociates urls with the given file hashes
+    pub async fn disassociate_urls(
+        &mut self,
+        urls: Vec<String>,
+        hashes: Vec<String>,
+    ) -> Result<()> {
+        self.post::<AssociateUrl>(AssociateUrlRequest {
+            hashes,
+            urls_to_add: vec![],
+            urls_to_delete: urls,
+        })
+        .await?;
+
+        Ok(())
     }
 }
