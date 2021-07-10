@@ -1,5 +1,5 @@
-use crate::paths::common::BasicHashList;
-use crate::paths::Path;
+use crate::endpoints::common::BasicHashList;
+use crate::endpoints::Endpoint;
 
 #[derive(Debug, Clone, Serialize)]
 pub struct AddFileRequest {
@@ -13,43 +13,61 @@ pub struct AddFileResponse {
     pub note: String,
 }
 
-impl Path for AddFileResponse {
+pub struct AddFile;
+
+impl Endpoint for AddFile {
+    type Request = AddFileRequest;
+    type Response = AddFileResponse;
+
     fn get_path() -> String {
         String::from("add_files/add_file")
     }
 }
 
 pub type DeleteFilesRequest = BasicHashList;
-pub struct DeleteFilesResponse;
 
-impl Path for DeleteFilesResponse {
+pub struct DeleteFiles;
+
+impl Endpoint for DeleteFiles {
+    type Request = DeleteFilesRequest;
+    type Response = ();
+
     fn get_path() -> String {
         String::from("add_files/delete_files")
     }
 }
 
 pub type UndeleteFilesRequest = BasicHashList;
-pub struct UndeleteFilesResponse;
+pub struct UndeleteFiles;
 
-impl Path for UndeleteFilesResponse {
+impl Endpoint for UndeleteFiles {
+    type Request = UndeleteFilesRequest;
+    type Response = ();
+
     fn get_path() -> String {
         String::from("add_files/undelete_files")
     }
 }
 
 pub type ArchiveFilesRequest = BasicHashList;
-pub struct ArchiveFilesResponse;
+pub struct ArchiveFiles;
 
-impl Path for ArchiveFilesResponse {
+impl Endpoint for ArchiveFiles {
+    type Request = ArchiveFilesRequest;
+    type Response = ();
+
     fn get_path() -> String {
         String::from("add_files/archive_files")
     }
 }
 
 pub type UnarchiveFilesRequest = BasicHashList;
-pub struct UnarchiveFilesResponse;
+pub struct UnarchiveFiles;
 
-impl Path for UnarchiveFilesResponse {
+impl Endpoint for UnarchiveFiles {
+    type Request = UndeleteFilesRequest;
+    type Response = ();
+
     fn get_path() -> String {
         String::from("add_files/unarchive_files")
     }

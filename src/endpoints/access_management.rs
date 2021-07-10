@@ -1,5 +1,5 @@
-use crate::paths::common::BasicServiceInfo;
-use crate::paths::Path;
+use crate::endpoints::common::BasicServiceInfo;
+use crate::endpoints::Endpoint;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, Deserialize)]
@@ -8,7 +8,12 @@ pub struct ApiVersionResponse {
     pub hydrus_version: u32,
 }
 
-impl Path for ApiVersionResponse {
+pub struct ApiVersion;
+
+impl Endpoint for ApiVersion {
+    type Request = ();
+    type Response = ApiVersionResponse;
+
     fn get_path() -> String {
         String::from("api_version")
     }
@@ -19,7 +24,12 @@ pub struct SessionKeyResponse {
     pub session_key: String,
 }
 
-impl Path for SessionKeyResponse {
+pub struct SessionKey;
+
+impl Endpoint for SessionKey {
+    type Request = ();
+    type Response = SessionKeyResponse;
+
     fn get_path() -> String {
         String::from("session_key")
     }
@@ -31,7 +41,12 @@ pub struct VerifyAccessKeyResponse {
     pub human_description: String,
 }
 
-impl Path for VerifyAccessKeyResponse {
+pub struct VerifyAccessKey;
+
+impl Endpoint for VerifyAccessKey {
+    type Request = ();
+    type Response = VerifyAccessKeyResponse;
+
     fn get_path() -> String {
         String::from("verify_access_key")
     }
@@ -40,7 +55,12 @@ impl Path for VerifyAccessKeyResponse {
 #[derive(Debug, Clone, Deserialize)]
 pub struct GetServicesResponse(pub HashMap<String, Vec<BasicServiceInfo>>);
 
-impl Path for GetServicesResponse {
+pub struct GetServices;
+
+impl Endpoint for GetServices {
+    type Request = ();
+    type Response = GetServicesResponse;
+
     fn get_path() -> String {
         String::from("get_services")
     }

@@ -1,4 +1,4 @@
-use crate::paths::Path;
+use crate::endpoints::Endpoint;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, Deserialize)]
@@ -6,7 +6,12 @@ pub struct CleanTagsResponse {
     pub tags: Vec<String>,
 }
 
-impl Path for CleanTagsResponse {
+pub struct CleanTags;
+
+impl Endpoint for CleanTags {
+    type Request = ();
+    type Response = CleanTagsResponse;
+
     fn get_path() -> String {
         String::from("add_tags/clean_tags")
     }
@@ -19,9 +24,12 @@ pub struct AddTagsRequest {
     pub service_names_to_actions_to_tags: HashMap<String, HashMap<String, Vec<String>>>,
 }
 
-pub struct AddTagsResponse;
+pub struct AddTags;
 
-impl Path for AddTagsResponse {
+impl Endpoint for AddTags {
+    type Request = AddTagsRequest;
+    type Response = ();
+
     fn get_path() -> String {
         String::from("add_tags/add_tags")
     }

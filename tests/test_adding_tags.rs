@@ -1,4 +1,4 @@
-use hydrus_api::paths::adding_tags::{AddTagsRequestBuilder, TagAction};
+use hydrus_api::endpoints::adding_tags::{AddTagsRequestBuilder, TagAction};
 mod common;
 
 #[tokio::test]

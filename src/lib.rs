@@ -6,7 +6,7 @@
 //! ## Usage Example
 //! ```
 //! use hydrus_api::Client;
-//! use hydrus_api::paths::adding_tags::{AddTagsRequestBuilder, TagAction};
+//! use hydrus_api::endpoints::adding_tags::{AddTagsRequestBuilder, TagAction};
 //! use std::env;
 //! # #[tokio::test]
 //! # async fn doctest() {
@@ -35,8 +35,8 @@
 extern crate serde_derive;
 
 pub mod client;
+pub mod endpoints;
 mod error;
-pub mod paths;
 pub(crate) mod utils;
 
 pub use client::Client;
