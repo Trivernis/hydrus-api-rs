@@ -36,7 +36,7 @@ extern crate serde_derive;
 
 pub mod client;
 pub mod endpoints;
-mod error;
+pub mod error;
 pub(crate) mod utils;
 
 pub use client::Client;

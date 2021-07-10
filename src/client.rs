@@ -7,9 +7,14 @@ use crate::endpoints::adding_files::{
     DeleteFilesRequest, UnarchiveFiles, UnarchiveFilesRequest, UndeleteFiles, UndeleteFilesRequest,
 };
 use crate::endpoints::adding_tags::{AddTags, AddTagsRequest, CleanTags, CleanTagsResponse};
+use crate::endpoints::common::{FileIdentifier, FileRecord};
+use crate::endpoints::searching_and_fetching_files::{
+    FileMetadata, FileMetadataResponse, FileSearchLocation, GetFile, SearchFiles,
+    SearchFilesResponse,
+};
 use crate::endpoints::Endpoint;
 use crate::error::{Error, Result};
-use crate::utils::string_list_to_json_array;
+use crate::utils::{number_list_to_json_array, string_list_to_json_array};
 use reqwest::Response;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
@@ -32,11 +37,8 @@ impl Client {
         })
     }
 
-    /// Starts a get request to the path associated with the return type
-    async fn get_and_parse<E: Endpoint, Q: Serialize + ?Sized>(
-        &mut self,
-        query: &Q,
-    ) -> Result<E::Response> {
+    /// Starts a get request to the path
+    async fn get<E: Endpoint, Q: Serialize + ?Sized>(&mut self, query: &Q) -> Result<Response> {
         let response = self
             .inner
             .get(format!("{}/{}", self.base_url, E::get_path()))
@@ -44,12 +46,21 @@ impl Client {
             .query(query)
             .send()
             .await?;
-        let response = Self::extract_error(response).await?;
+
+        Self::extract_error(response).await
+    }
+
+    /// Starts a get request to the path associated with the Endpoint Type
+    async fn get_and_parse<E: Endpoint, Q: Serialize + ?Sized>(
+        &mut self,
+        query: &Q,
+    ) -> Result<E::Response> {
+        let response = self.get::<E, Q>(query).await?;
 
         Self::extract_content(response).await
     }
 
-    /// Stats a post request to the path associated with the return type
+    /// Stats a post request to the path associated with the Endpoint Type
     async fn post<E: Endpoint>(&mut self, body: E::Request) -> Result<Response> {
         let response = self
             .inner
@@ -178,5 +189,56 @@ impl Client {
         self.post::<AddTags>(request).await?;
 
         Ok(())
+    }
+
+    /// Searches for files in the inbox, the archive or both
+    pub async fn search_files(
+        &mut self,
+        tags: Vec<String>,
+        location: FileSearchLocation,
+    ) -> Result<SearchFilesResponse> {
+        self.get_and_parse::<SearchFiles, [(&str, String)]>(&[
+            ("tags", string_list_to_json_array(tags)),
+            ("system_inbox", location.is_inbox().to_string()),
+            ("system_archive", location.is_archive().to_string()),
+        ])
+        .await
+    }
+
+    /// Returns the metadata for a given list of file_ids or hashes
+    pub async fn get_file_metadata(
+        &mut self,
+        file_ids: Vec<u64>,
+        hashes: Vec<String>,
+    ) -> Result<FileMetadataResponse> {
+        self.get_and_parse::<FileMetadata, [(&str, String)]>(&[
+            ("file_ids", number_list_to_json_array(file_ids)),
+            ("hashes", string_list_to_json_array(hashes)),
+        ])
+        .await
+    }
+
+    /// Returns the bytes of a file from hydrus
+    pub async fn get_file(&mut self, id: FileIdentifier) -> Result<FileRecord> {
+        let response = match id {
+            FileIdentifier::ID(id) => {
+                self.get::<GetFile, [(&str, u64)]>(&[("file_id", id)])
+                    .await?
+            }
+            FileIdentifier::Hash(hash) => {
+                self.get::<GetFile, [(&str, String)]>(&[("hash", hash)])
+                    .await?
+            }
+        };
+        let mime_type = response
+            .headers()
+            .get("mime-type")
+            .cloned()
+            .map(|h| h.to_str().unwrap().to_string())
+            .unwrap_or("image/jpeg".into());
+
+        let bytes = response.bytes().await?.to_vec();
+
+        Ok(FileRecord { bytes, mime_type })
     }
 }
