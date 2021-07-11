@@ -23,3 +23,25 @@ async fn it_imports() {
         .await
         .unwrap();
 }
+
+#[tokio::test]
+async fn it_associates() {
+    let mut url = get_url().await;
+
+    url.associate(vec![
+        "0000000000000000000000000000000000000000000000000000000000000000".to_string(),
+    ])
+    .await
+    .unwrap();
+}
+
+#[tokio::test]
+async fn it_disassociates() {
+    let mut url = get_url().await;
+
+    url.disassociate(vec![
+        "0000000000000000000000000000000000000000000000000000000000000000".to_string(),
+    ])
+    .await
+    .unwrap();
+}

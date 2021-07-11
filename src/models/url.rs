@@ -58,4 +58,18 @@ impl Url {
     pub fn import(&mut self) -> UrlImportBuilder {
         UrlImportBuilder::new(self.client.clone(), &self.url)
     }
+
+    /// Associates the url with a list of file hashes
+    pub async fn associate(&mut self, hashes: Vec<String>) -> Result<()> {
+        self.client
+            .associate_urls(vec![self.url.clone()], hashes)
+            .await
+    }
+
+    /// Disassociates the url with a list of file hashes
+    pub async fn disassociate(&mut self, hashes: Vec<String>) -> Result<()> {
+        self.client
+            .disassociate_urls(vec![self.url.clone()], hashes)
+            .await
+    }
 }
