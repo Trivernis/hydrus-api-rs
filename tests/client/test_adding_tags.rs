@@ -3,7 +3,7 @@ use hydrus_api::endpoints::adding_tags::{AddTagsRequestBuilder, TagAction};
 
 #[tokio::test]
 async fn it_cleans_tags() {
-    let mut client = common::get_client();
+    let client = common::get_client();
     let response = client
         .clean_tags(vec![
             "summer".into(),
@@ -18,7 +18,7 @@ async fn it_cleans_tags() {
 
 #[tokio::test]
 async fn it_adds_tags() {
-    let mut client = common::get_client();
+    let client = common::get_client();
     let request = AddTagsRequestBuilder::default()
         .add_hash("0000000000000000000000000000000000000000000000000000000000000000") // valid hash, I hope no files are affected
         .add_tags("my tags", vec!["beach".into(), "summer".into()])

@@ -8,9 +8,9 @@ pub mod adding_urls;
 pub mod common;
 pub mod searching_and_fetching_files;
 
-pub trait Endpoint {
+pub(crate) trait Endpoint {
     type Request: Serialize;
     type Response: DeserializeOwned;
 
-    fn get_path() -> String;
+    fn path() -> String;
 }

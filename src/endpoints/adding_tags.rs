@@ -12,7 +12,7 @@ impl Endpoint for CleanTags {
     type Request = ();
     type Response = CleanTagsResponse;
 
-    fn get_path() -> String {
+    fn path() -> String {
         String::from("add_tags/clean_tags")
     }
 }
@@ -30,7 +30,7 @@ impl Endpoint for AddTags {
     type Request = AddTagsRequest;
     type Response = ();
 
-    fn get_path() -> String {
+    fn path() -> String {
         String::from("add_tags/add_tags")
     }
 }

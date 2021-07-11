@@ -3,7 +3,7 @@ use hydrus_api::endpoints::adding_urls::{AddUrlRequestBuilder, URL_TYPE_POST};
 
 #[tokio::test]
 async fn it_returns_files_for_an_url() {
-    let mut client = common::get_client();
+    let client = common::get_client();
     let response = client
         .get_url_files("https://www.pixiv.net/member_illust.php?illust_id=83406361&mode=medium")
         .await
@@ -14,7 +14,7 @@ async fn it_returns_files_for_an_url() {
 
 #[tokio::test]
 async fn it_returns_url_information() {
-    let mut client = common::get_client();
+    let client = common::get_client();
     let info = client
         .get_url_info("https://www.pixiv.net/member_illust.php?illust_id=83406361&mode=medium")
         .await
@@ -25,7 +25,7 @@ async fn it_returns_url_information() {
 
 #[tokio::test]
 async fn it_adds_urls() {
-    let mut client = common::get_client();
+    let client = common::get_client();
     let request = AddUrlRequestBuilder::default()
         .url("https://www.pixiv.net/member_illust.php?illust_id=83406361&mode=medium")
         .add_tags(
@@ -41,7 +41,7 @@ async fn it_adds_urls() {
 
 #[tokio::test]
 async fn it_associates_urls() {
-    let mut client = common::get_client();
+    let client = common::get_client();
     client
         .associate_urls(
             vec![
@@ -56,7 +56,7 @@ async fn it_associates_urls() {
 
 #[tokio::test]
 async fn it_disassociates_urls() {
-    let mut client = common::get_client();
+    let client = common::get_client();
     client
         .disassociate_urls(
             vec![

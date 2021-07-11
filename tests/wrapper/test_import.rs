@@ -7,7 +7,7 @@ use hydrus_api::url::UrlType;
 
 #[tokio::test]
 async fn it_imports_file_paths() {
-    let mut hydrus = common::get_hydrus();
+    let hydrus = common::get_hydrus();
     let result = hydrus
         .import()
         .file(FileImport::path("/does/not/exist/sadly"))
@@ -19,7 +19,7 @@ async fn it_imports_file_paths() {
 
 #[tokio::test]
 async fn it_imports_binary_files() {
-    let mut hydrus = common::get_hydrus();
+    let hydrus = common::get_hydrus();
     let bytes = [0u8, 0u8, 0u8, 0u8];
     let result = hydrus
         .import()
@@ -32,7 +32,7 @@ async fn it_imports_binary_files() {
 
 #[tokio::test]
 async fn it_imports_urls() {
-    let mut hydrus = common::get_hydrus();
+    let hydrus = common::get_hydrus();
 
     let result = hydrus
         .import()

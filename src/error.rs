@@ -1,3 +1,4 @@
+use crate::endpoints::common::FileIdentifier;
 use std::error::Error as StdError;
 use std::fmt;
 
@@ -10,6 +11,7 @@ pub enum Error {
     InvalidServiceType(String),
     ImportVetoed(String),
     ImportFailed(String),
+    FileNotFound(FileIdentifier),
 }
 
 impl fmt::Display for Error {
@@ -22,6 +24,7 @@ impl fmt::Display for Error {
             }
             Self::ImportFailed(msg) => write!(f, "File import failed: {}", msg),
             Self::ImportVetoed(msg) => write!(f, "File import vetoed: {}", msg),
+            Self::FileNotFound(id) => write!(f, "File {:?} not found", id),
         }
     }
 }
@@ -30,10 +33,7 @@ impl StdError for Error {
     fn source(&self) -> Option<&(dyn StdError + 'static)> {
         match self {
             Self::Reqwest(e) => e.source(),
-            Self::Hydrus(_) => None,
-            Self::InvalidServiceType(_) => None,
-            Self::ImportVetoed(_) => None,
-            Self::ImportFailed(_) => None,
+            _ => None,
         }
     }
 }

@@ -56,8 +56,10 @@ impl ToString for ServiceType {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialOrd, PartialEq, Hash)]
 pub struct ServiceName(pub String);
+
+impl Eq for ServiceName {}
 
 impl ServiceName {
     pub fn my_tags() -> Self {

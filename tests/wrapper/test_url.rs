@@ -5,7 +5,7 @@ use hydrus_api::tag::Tag;
 use hydrus_api::url::Url;
 
 async fn get_url() -> Url {
-    let mut hydrus = common::get_hydrus();
+    let hydrus = common::get_hydrus();
     hydrus
         .url("https://www.pixiv.net/member_illust.php?illust_id=83406361&mode=medium")
         .await

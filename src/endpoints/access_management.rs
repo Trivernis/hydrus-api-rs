@@ -23,7 +23,7 @@ impl Endpoint for ApiVersion {
     type Request = ();
     type Response = ApiVersionResponse;
 
-    fn get_path() -> String {
+    fn path() -> String {
         String::from("api_version")
     }
 }
@@ -39,7 +39,7 @@ impl Endpoint for SessionKey {
     type Request = ();
     type Response = SessionKeyResponse;
 
-    fn get_path() -> String {
+    fn path() -> String {
         String::from("session_key")
     }
 }
@@ -56,7 +56,7 @@ impl Endpoint for VerifyAccessKey {
     type Request = ();
     type Response = VerifyAccessKeyResponse;
 
-    fn get_path() -> String {
+    fn path() -> String {
         String::from("verify_access_key")
     }
 }
@@ -70,7 +70,7 @@ impl Endpoint for GetServices {
     type Request = ();
     type Response = GetServicesResponse;
 
-    fn get_path() -> String {
+    fn path() -> String {
         String::from("get_services")
     }
 }

@@ -27,7 +27,7 @@ impl Endpoint for GetUrlFiles {
     type Request = ();
     type Response = GetUrlFilesResponse;
 
-    fn get_path() -> String {
+    fn path() -> String {
         String::from("add_urls/get_url_files")
     }
 }
@@ -47,7 +47,7 @@ impl Endpoint for GetUrlInfo {
     type Request = ();
     type Response = GetUrlInfoResponse;
 
-    fn get_path() -> String {
+    fn path() -> String {
         String::from("add_urls/get_url_info")
     }
 }
@@ -164,7 +164,7 @@ impl Endpoint for AddUrl {
     type Request = AddUrlRequest;
     type Response = AddUrlResponse;
 
-    fn get_path() -> String {
+    fn path() -> String {
         String::from("add_urls/add_url")
     }
 }
@@ -181,7 +181,7 @@ impl Endpoint for AssociateUrl {
     type Request = AssociateUrlRequest;
     type Response = ();
 
-    fn get_path() -> String {
+    fn path() -> String {
         String::from("add_urls/associate_url")
     }
 }

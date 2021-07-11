@@ -44,14 +44,14 @@ impl Endpoint for SearchFiles {
     type Request = ();
     type Response = SearchFilesResponse;
 
-    fn get_path() -> String {
+    fn path() -> String {
         String::from("get_files/search_files")
     }
 }
 
-#[derive(Clone, Default, Deserialize)]
+#[derive(Clone, Debug, Default, Deserialize)]
 pub struct FileMetadataResponse {
-    metadata: Vec<FileMetadataInfo>,
+    pub metadata: Vec<FileMetadataInfo>,
 }
 
 pub struct FileMetadata;
@@ -60,7 +60,7 @@ impl Endpoint for FileMetadata {
     type Request = ();
     type Response = FileMetadataResponse;
 
-    fn get_path() -> String {
+    fn path() -> String {
         String::from("get_files/file_metadata")
     }
 }
@@ -71,7 +71,7 @@ impl Endpoint for GetFile {
     type Request = ();
     type Response = ();
 
-    fn get_path() -> String {
+    fn path() -> String {
         String::from("get_files/file")
     }
 }

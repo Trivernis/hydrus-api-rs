@@ -51,7 +51,7 @@ pub struct FileImportBuilder {
 }
 
 impl FileImportBuilder {
-    pub async fn run(mut self) -> Result<HydrusFile> {
+    pub async fn run(self) -> Result<HydrusFile> {
         let response = match self.file {
             FileImport::Path(path) => self.client.add_file(path).await?,
             FileImport::Binary(b) => self.client.add_binary_file(b).await?,
@@ -137,7 +137,7 @@ impl UrlImportBuilder {
     }
 
     /// Imports the URL
-    pub async fn run(mut self) -> Result<Url> {
+    pub async fn run(self) -> Result<Url> {
         let mut request = AddUrlRequestBuilder::default().url(&self.url);
 
         for (service, tags) in self.service_tag_mappings {
