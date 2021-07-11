@@ -3,6 +3,7 @@ use hydrus_api::builders::import_builder::FileImport;
 use hydrus_api::page::PageIdentifier;
 use hydrus_api::service::ServiceName;
 use hydrus_api::tag::Tag;
+use hydrus_api::url::UrlType;
 
 #[tokio::test]
 async fn it_imports_file_paths() {
@@ -36,7 +37,7 @@ async fn it_imports_urls() {
     let result = hydrus
         .import()
         .url("https://www.pixiv.net/member_illust.php?illust_id=83406361&mode=medium")
-        .set_page(PageIdentifier::name("Rusty Import"))
+        .page(PageIdentifier::name("Rusty Import"))
         .show_page(true)
         .add_additional_tag(ServiceName::my_tags(), Tag::from("ark mage"))
         .add_additional_tag(ServiceName::my_tags(), Tag::from("character:megumin"))
@@ -44,5 +45,6 @@ async fn it_imports_urls() {
         .await
         .unwrap();
 
-    assert!(result.normalised_url.is_some()) // because it's returned by the import
+    assert!(result.normalised_url.len() > 0);
+    assert_eq!(result.url_type, UrlType::Post)
 }

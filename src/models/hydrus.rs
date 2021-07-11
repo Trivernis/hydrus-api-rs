@@ -1,5 +1,6 @@
 use crate::builders::import_builder::ImportBuilder;
 use crate::error::Result;
+use crate::models::url::Url;
 use crate::models::version::Version;
 use crate::service::Services;
 use crate::Client;
@@ -35,5 +36,20 @@ impl Hydrus {
         ImportBuilder {
             client: self.client.clone(),
         }
+    }
+
+    /// Returns information about a given url in an object that allows
+    /// further operations with that url
+    pub async fn url<S: AsRef<str>>(&mut self, url: S) -> Result<Url> {
+        let info = self.client.get_url_info(&url).await?;
+
+        Ok(Url {
+            client: self.client.clone(),
+            normalised_url: info.normalised_url,
+            url_type: info.url_type.into(),
+            match_name: info.match_name,
+            url: url.as_ref().to_string(),
+            can_parse: info.can_parse,
+        })
     }
 }

@@ -16,7 +16,7 @@ pub struct GetUrlFilesResponse {
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct UrlFileStatus {
-    pub status: u32,
+    pub status: u8,
     pub hash: String,
     pub note: String,
 }

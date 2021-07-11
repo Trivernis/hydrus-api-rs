@@ -1,6 +1,5 @@
 use crate::endpoints::adding_files::{STATUS_IMPORT_FAILED, STATUS_IMPORT_VETOED};
 use crate::endpoints::adding_urls::AddUrlRequestBuilder;
-use crate::endpoints::common::FileIdentifier;
 use crate::error::{Error, Result};
 use crate::hydrus_file::HydrusFile;
 use crate::models::url::Url;
@@ -25,14 +24,7 @@ impl ImportBuilder {
     }
 
     pub fn url<S: ToString>(self, url: S) -> UrlImportBuilder {
-        UrlImportBuilder {
-            client: self.client,
-            url: url.to_string(),
-            page: None,
-            show_page: false,
-            filter_tags: vec![],
-            service_tag_mappings: Default::default(),
-        }
+        UrlImportBuilder::new(self.client.clone(), url)
     }
 }
 
@@ -58,15 +50,6 @@ pub struct FileImportBuilder {
     file: FileImport,
 }
 
-pub struct UrlImportBuilder {
-    client: Client,
-    url: String,
-    page: Option<PageIdentifier>,
-    show_page: bool,
-    filter_tags: Vec<Tag>,
-    service_tag_mappings: HashMap<String, Vec<Tag>>,
-}
-
 impl FileImportBuilder {
     pub async fn run(mut self) -> Result<HydrusFile> {
         let response = match self.file {
@@ -79,17 +62,38 @@ impl FileImportBuilder {
         } else if response.status == STATUS_IMPORT_VETOED {
             Err(Error::ImportVetoed(response.note))
         } else {
-            Ok(HydrusFile {
-                client: self.client,
-                id: FileIdentifier::Hash(response.hash),
-            })
+            Ok(HydrusFile::from_raw_status_and_hash(
+                self.client,
+                response.status,
+                response.hash,
+            ))
         }
     }
 }
 
+pub struct UrlImportBuilder {
+    client: Client,
+    url: String,
+    page: Option<PageIdentifier>,
+    show_page: bool,
+    filter_tags: Vec<Tag>,
+    service_tag_mappings: HashMap<String, Vec<Tag>>,
+}
+
 impl UrlImportBuilder {
+    pub fn new<S: ToString>(client: Client, url: S) -> Self {
+        Self {
+            client,
+            url: url.to_string(),
+            page: None,
+            show_page: false,
+            filter_tags: vec![],
+            service_tag_mappings: Default::default(),
+        }
+    }
+
     /// Sets the destination page of the import
-    pub fn set_page(mut self, page: PageIdentifier) -> Self {
+    pub fn page(mut self, page: PageIdentifier) -> Self {
         self.page = Some(page);
 
         self
@@ -134,7 +138,7 @@ impl UrlImportBuilder {
 
     /// Imports the URL
     pub async fn run(mut self) -> Result<Url> {
-        let mut request = AddUrlRequestBuilder::default().url(self.url.clone());
+        let mut request = AddUrlRequestBuilder::default().url(&self.url);
 
         for (service, tags) in self.service_tag_mappings {
             request = request.add_tags(service, tag_list_to_string_list(tags));
@@ -149,10 +153,15 @@ impl UrlImportBuilder {
         request = request.show_destination_page(self.show_page);
 
         let response = self.client.add_url(request.build()).await?;
+        let url_info = self.client.get_url_info(&self.url).await?;
 
         Ok(Url {
             url: self.url,
-            normalised_url: Some(response.normalised_url),
+            client: self.client,
+            normalised_url: response.normalised_url,
+            url_type: url_info.url_type.into(),
+            match_name: url_info.match_name,
+            can_parse: url_info.can_parse,
         })
     }
 }
