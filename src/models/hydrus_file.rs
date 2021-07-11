@@ -1,7 +1,9 @@
+use crate::endpoints::adding_tags::{AddTagsRequestBuilder, TagAction};
 use crate::endpoints::common::{FileIdentifier, FileMetadataInfo};
 use crate::error::Result;
 use crate::service::ServiceName;
 use crate::tag::Tag;
+use crate::utils::tag_list_to_string_list;
 use crate::Client;
 use std::collections::HashMap;
 
@@ -136,5 +138,34 @@ impl HydrusFile {
         }
 
         Ok(tag_list)
+    }
+
+    /// Adds tags for a specific service to the file
+    pub async fn add_tags(&mut self, service: ServiceName, tags: Vec<Tag>) -> Result<()> {
+        let hash = self.hash().await?;
+        let request = AddTagsRequestBuilder::default()
+            .add_hash(hash)
+            .add_tags(service.0, tag_list_to_string_list(tags))
+            .build();
+
+        self.client.add_tags(request).await
+    }
+
+    /// Allows modification of tags by using the defined tag actions
+    pub async fn modify_tags(
+        &mut self,
+        service: ServiceName,
+        action: TagAction,
+        tags: Vec<Tag>,
+    ) -> Result<()> {
+        let hash = self.hash().await?;
+        let mut reqwest = AddTagsRequestBuilder::default().add_hash(hash);
+
+        for tag in tags {
+            reqwest =
+                reqwest.add_tag_with_action(service.0.clone(), tag.to_string(), action.clone());
+        }
+
+        self.client.add_tags(reqwest.build()).await
     }
 }

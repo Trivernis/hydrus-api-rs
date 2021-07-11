@@ -42,6 +42,7 @@ pub struct AddTagsRequestBuilder {
 }
 
 /// List of actions for a given tag
+#[derive(Clone, Debug)]
 pub enum TagAction {
     /// Add to a local tag service.
     AddToLocalService,

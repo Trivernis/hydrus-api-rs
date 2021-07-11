@@ -1,6 +1,8 @@
 use super::super::common;
+use hydrus_api::endpoints::adding_tags::TagAction;
 use hydrus_api::endpoints::common::FileIdentifier;
 use hydrus_api::hydrus_file::HydrusFile;
+use hydrus_api::service::ServiceName;
 
 async fn get_file() -> HydrusFile {
     let hydrus = common::get_hydrus();
@@ -46,4 +48,27 @@ async fn it_has_tags() {
     let tags = file.tags().await.unwrap();
 
     assert!(tags.len() > 0) // test data needs to be prepared this way
+}
+
+#[tokio::test]
+async fn it_adds_tags() {
+    let mut file = get_file().await;
+    file.add_tags(
+        ServiceName::public_tag_repository(),
+        vec!["character:megumin".into(), "ark mage".into()],
+    )
+    .await
+    .unwrap();
+}
+
+#[tokio::test]
+async fn it_modifies_tags() {
+    let mut file = get_file().await;
+    file.modify_tags(
+        ServiceName::public_tag_repository(),
+        TagAction::RescindPendFromRepository,
+        vec!["ark mage".into()],
+    )
+    .await
+    .unwrap();
 }
