@@ -32,11 +32,13 @@ pub struct FileMetadataInfo {
     pub service_names_to_statuses_to_display_tags: HashMap<String, HashMap<String, Vec<String>>>,
 }
 
+#[derive(Clone)]
 pub enum FileIdentifier {
     ID(u64),
     Hash(String),
 }
 
+#[derive(Clone)]
 pub struct FileRecord {
     pub bytes: Vec<u8>,
     pub mime_type: String,

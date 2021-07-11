@@ -1,3 +1,4 @@
+use crate::builders::import_builder::ImportBuilder;
 use crate::error::Result;
 use crate::models::version::Version;
 use crate::service::Services;
@@ -27,5 +28,12 @@ impl Hydrus {
         let response = self.client.get_services().await?;
 
         Ok(Services::from_response(self.client.clone(), response))
+    }
+
+    /// Creates an import builder to build an import request to hydrus
+    pub fn import(&mut self) -> ImportBuilder {
+        ImportBuilder {
+            client: self.client.clone(),
+        }
     }
 }

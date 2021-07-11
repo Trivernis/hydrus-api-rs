@@ -57,9 +57,38 @@ impl ToString for ServiceType {
 }
 
 #[derive(Clone)]
+pub struct ServiceName(pub String);
+
+impl ServiceName {
+    pub fn my_tags() -> Self {
+        Self(String::from("my tags"))
+    }
+
+    pub fn my_files() -> Self {
+        Self(String::from("my files"))
+    }
+
+    pub fn public_tag_repository() -> Self {
+        Self(String::from("public tag repository"))
+    }
+
+    pub fn all_local_files() -> Self {
+        Self(String::from("all local files"))
+    }
+
+    pub fn all_known_tags() -> Self {
+        Self(String::from("all known tags"))
+    }
+
+    pub fn all_known_files() -> Self {
+        Self(String::from("all known files"))
+    }
+}
+
+#[derive(Clone)]
 pub struct Service {
     client: Client,
-    pub name: String,
+    pub name: ServiceName,
     pub key: String,
     pub service_type: ServiceType,
 }
@@ -70,6 +99,7 @@ pub struct Services {
 }
 
 impl Services {
+    /// Creates the services list from a given hydrus response
     pub fn from_response(client: Client, response: GetServicesResponse) -> Self {
         let mut response = response.0;
         let mut mapped_types = HashMap::with_capacity(response.keys().len());
@@ -83,7 +113,7 @@ impl Services {
                 for basic_service in basic_services {
                     service_list.push(Service {
                         service_type: mapped_type.clone(),
-                        name: basic_service.name,
+                        name: ServiceName(basic_service.name),
                         key: basic_service.service_key,
                         client: client.clone(),
                     })

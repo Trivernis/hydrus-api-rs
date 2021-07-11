@@ -8,6 +8,8 @@ pub enum Error {
     Reqwest(reqwest::Error),
     Hydrus(String),
     InvalidServiceType(String),
+    ImportVetoed(String),
+    ImportFailed(String),
 }
 
 impl fmt::Display for Error {
@@ -18,6 +20,8 @@ impl fmt::Display for Error {
             Self::InvalidServiceType(service_type) => {
                 write!(f, "Invalid Service Type '{}'", service_type)
             }
+            Self::ImportFailed(msg) => write!(f, "File import failed: {}", msg),
+            Self::ImportVetoed(msg) => write!(f, "File import vetoed: {}", msg),
         }
     }
 }
@@ -28,6 +32,8 @@ impl StdError for Error {
             Self::Reqwest(e) => e.source(),
             Self::Hydrus(_) => None,
             Self::InvalidServiceType(_) => None,
+            Self::ImportVetoed(_) => None,
+            Self::ImportFailed(_) => None,
         }
     }
 }

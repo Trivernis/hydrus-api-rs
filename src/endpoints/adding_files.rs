@@ -1,6 +1,12 @@
 use crate::endpoints::common::BasicHashList;
 use crate::endpoints::Endpoint;
 
+pub static STATUS_IMPORT_SUCCESS: u8 = 1;
+pub static STATUS_IMPORT_ALREADY_EXISTS: u8 = 2;
+pub static STATUS_IMPORT_PREVIOUSLY_DELETED: u8 = 3;
+pub static STATUS_IMPORT_FAILED: u8 = 4;
+pub static STATUS_IMPORT_VETOED: u8 = 5;
+
 #[derive(Debug, Clone, Serialize)]
 pub struct AddFileRequest {
     pub path: String,
