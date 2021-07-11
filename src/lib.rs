@@ -37,6 +37,9 @@ extern crate serde;
 pub mod client;
 pub mod endpoints;
 pub mod error;
+mod models;
 pub(crate) mod utils;
 
 pub use client::Client;
+pub use models::hydrus::Hydrus;
+pub use models::*;

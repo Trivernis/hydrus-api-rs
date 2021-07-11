@@ -1,4 +1,4 @@
-mod common;
+use super::super::common;
 
 #[tokio::test]
 async fn it_returns_the_api_version() {

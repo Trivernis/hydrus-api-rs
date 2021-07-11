@@ -1,5 +1,5 @@
+use super::super::common;
 use hydrus_api::endpoints::adding_tags::{AddTagsRequestBuilder, TagAction};
-mod common;
 
 #[tokio::test]
 async fn it_cleans_tags() {

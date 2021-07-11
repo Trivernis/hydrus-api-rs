@@ -1,4 +1,5 @@
 use hydrus_api::client::Client;
+use hydrus_api::Hydrus;
 use log::LevelFilter;
 use std::env;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -15,9 +16,16 @@ pub fn setup() {
 
 pub fn get_client() -> Client {
     setup();
+
     Client::new(
         env::var("HYDRUS_URL").unwrap(),
         env::var("HYDRUS_ACCESS_KEY").unwrap(),
     )
     .unwrap()
+}
+
+pub fn get_hydrus() -> Hydrus {
+    let client = get_client();
+
+    Hydrus::new(client)
 }

@@ -2,6 +2,15 @@ use crate::endpoints::common::BasicServiceInfo;
 use crate::endpoints::Endpoint;
 use std::collections::HashMap;
 
+pub static SERVICE_TYPE_LOCAL_TAGS: &str = "local_tags";
+pub static SERVICE_TYPE_TAG_REPOSITORIES: &str = "tag_repositories";
+pub static SERVICE_TYPE_LOCAL_FILES: &str = "local_files";
+pub static SERVICE_TYPE_FILE_REPOSITORIES: &str = "file_repositories";
+pub static SERVICE_TYPE_ALL_LOCAL_FILES: &str = "all_local_files";
+pub static SERVICE_TYPE_ALL_KNOWN_FILES: &str = "all_known_files";
+pub static SERVICE_TYPE_ALL_KNOWN_TAGS: &str = "all_known_tags";
+pub static SERVICE_TYPE_TRASH: &str = "trash";
+
 #[derive(Debug, Clone, Deserialize)]
 pub struct ApiVersionResponse {
     pub version: u32,

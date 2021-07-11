@@ -25,6 +25,7 @@ use serde::Serialize;
 
 static ACCESS_KEY_HEADER: &str = "Hydrus-Client-API-Access-Key";
 
+#[derive(Clone)]
 pub struct Client {
     inner: reqwest::Client,
     base_url: String,

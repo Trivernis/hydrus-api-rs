@@ -7,6 +7,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 pub enum Error {
     Reqwest(reqwest::Error),
     Hydrus(String),
+    InvalidServiceType(String),
 }
 
 impl fmt::Display for Error {
@@ -14,6 +15,9 @@ impl fmt::Display for Error {
         match self {
             Self::Reqwest(e) => e.fmt(f),
             Self::Hydrus(msg) => msg.fmt(f),
+            Self::InvalidServiceType(service_type) => {
+                write!(f, "Invalid Service Type '{}'", service_type)
+            }
         }
     }
 }
@@ -23,6 +27,7 @@ impl StdError for Error {
         match self {
             Self::Reqwest(e) => e.source(),
             Self::Hydrus(_) => None,
+            Self::InvalidServiceType(_) => None,
         }
     }
 }
