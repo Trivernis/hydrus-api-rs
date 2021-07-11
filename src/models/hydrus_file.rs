@@ -26,6 +26,15 @@ pub struct HydrusFile {
 }
 
 impl HydrusFile {
+    pub(crate) fn from_id(client: Client, id: u64) -> Self {
+        Self {
+            client,
+            id: FileIdentifier::ID(id),
+            status: FileStatus::Unknown,
+            metadata: None,
+        }
+    }
+
     pub(crate) fn from_raw_status_and_hash<S: ToString>(
         client: Client,
         status: u8,

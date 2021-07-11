@@ -1,10 +1,13 @@
 use crate::builders::import_builder::ImportBuilder;
 use crate::endpoints::common::FileIdentifier;
+use crate::endpoints::searching_and_fetching_files::FileSearchLocation;
 use crate::error::Result;
 use crate::hydrus_file::HydrusFile;
 use crate::models::url::Url;
 use crate::models::version::Version;
 use crate::service::Services;
+use crate::tag::Tag;
+use crate::utils::tag_list_to_string_list;
 use crate::Client;
 
 pub struct Hydrus {
@@ -63,5 +66,24 @@ impl Hydrus {
             .await?;
 
         Ok(HydrusFile::from_metadata(self.client.clone(), metadata))
+    }
+
+    /// Searches for files that have the given tags and returns a list of hydrus files as a result
+    pub async fn search(
+        &self,
+        location: FileSearchLocation,
+        tags: Vec<Tag>,
+    ) -> Result<Vec<HydrusFile>> {
+        let search_result = self
+            .client
+            .search_files(tag_list_to_string_list(tags), location)
+            .await?;
+        let files = search_result
+            .file_ids
+            .into_iter()
+            .map(|id| HydrusFile::from_id(self.client.clone(), id))
+            .collect();
+
+        Ok(files)
     }
 }

@@ -1,4 +1,5 @@
 use super::super::common;
+use hydrus_api::endpoints::searching_and_fetching_files::FileSearchLocation;
 use hydrus_api::service::ServiceType;
 use hydrus_api::url::UrlType;
 
@@ -29,4 +30,16 @@ async fn it_retrieves_url_information() {
         .unwrap();
 
     assert_eq!(url.url_type, UrlType::Post)
+}
+
+#[tokio::test]
+async fn it_searches() {
+    let hydrus = common::get_hydrus();
+    hydrus
+        .search(
+            FileSearchLocation::Archive,
+            vec!["character:megumin".into()],
+        )
+        .await
+        .unwrap();
 }

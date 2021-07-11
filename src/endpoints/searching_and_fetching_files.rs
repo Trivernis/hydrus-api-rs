@@ -7,7 +7,6 @@ pub struct SearchFilesResponse {
 }
 
 pub enum FileSearchLocation {
-    All,
     Inbox,
     Archive,
 }
@@ -15,14 +14,6 @@ pub enum FileSearchLocation {
 impl FileSearchLocation {
     pub fn is_inbox(&self) -> bool {
         if let &Self::Inbox = &self {
-            true
-        } else {
-            self.is_all()
-        }
-    }
-
-    pub fn is_all(&self) -> bool {
-        if let &Self::All = &self {
             true
         } else {
             false
@@ -33,7 +24,7 @@ impl FileSearchLocation {
         if let &Self::Archive = &self {
             true
         } else {
-            self.is_all()
+            false
         }
     }
 }
