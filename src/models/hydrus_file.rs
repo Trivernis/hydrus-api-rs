@@ -1,5 +1,5 @@
 use crate::endpoints::adding_tags::{AddTagsRequestBuilder, TagAction};
-use crate::endpoints::common::{FileIdentifier, FileMetadataInfo};
+use crate::endpoints::common::{FileIdentifier, FileMetadataInfo, FileRecord};
 use crate::error::Result;
 use crate::service::ServiceName;
 use crate::tag::Tag;
@@ -176,5 +176,10 @@ impl HydrusFile {
         }
 
         self.client.add_tags(reqwest.build()).await
+    }
+
+    /// Retrieves the file record bytes
+    pub async fn retrieve(&self) -> Result<FileRecord> {
+        self.client.get_file(self.id.clone()).await
     }
 }

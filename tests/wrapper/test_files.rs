@@ -72,3 +72,11 @@ async fn it_modifies_tags() {
     .await
     .unwrap();
 }
+
+#[tokio::test]
+async fn it_retrieves_content() {
+    let file = get_file().await;
+    let file = file.retrieve().await.unwrap();
+
+    assert!(file.bytes.len() > 0) // assuming it exists
+}
