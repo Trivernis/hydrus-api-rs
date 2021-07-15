@@ -1,9 +1,9 @@
-use crate::builders::import_builder::UrlImportBuilder;
-use crate::endpoints::adding_urls::{
+use crate::api_core::adding_urls::{
     URL_TYPE_FILE, URL_TYPE_GALLERY, URL_TYPE_POST, URL_TYPE_WATCHABLE,
 };
 use crate::error::Result;
-use crate::hydrus_file::HydrusFile;
+use crate::wrapper::builders::import_builder::UrlImportBuilder;
+use crate::wrapper::hydrus_file::HydrusFile;
 use crate::Client;
 
 #[derive(Clone, Debug, PartialOrd, PartialEq)]

@@ -1,4 +1,4 @@
-use hydrus_api::client::Client;
+use hydrus_api::api_core::client::Client;
 use hydrus_api::Hydrus;
 use log::LevelFilter;
 use std::env;
@@ -21,7 +21,6 @@ pub fn get_client() -> Client {
         env::var("HYDRUS_URL").unwrap(),
         env::var("HYDRUS_ACCESS_KEY").unwrap(),
     )
-    .unwrap()
 }
 
 pub fn get_hydrus() -> Hydrus {

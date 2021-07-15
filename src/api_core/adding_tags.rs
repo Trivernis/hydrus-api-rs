@@ -1,4 +1,4 @@
-use crate::endpoints::Endpoint;
+use crate::api_core::Endpoint;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, Deserialize)]

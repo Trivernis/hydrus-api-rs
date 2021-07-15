@@ -1,5 +1,5 @@
 use super::super::common;
-use hydrus_api::endpoints::adding_urls::{AddUrlRequestBuilder, URL_TYPE_POST};
+use hydrus_api::api_core::adding_urls::{AddUrlRequestBuilder, URL_TYPE_POST};
 
 #[tokio::test]
 async fn it_returns_files_for_an_url() {

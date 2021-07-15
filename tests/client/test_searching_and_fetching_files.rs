@@ -1,6 +1,6 @@
 use super::super::common;
-use hydrus_api::endpoints::common::FileIdentifier;
-use hydrus_api::endpoints::searching_and_fetching_files::FileSearchLocation;
+use hydrus_api::api_core::common::FileIdentifier;
+use hydrus_api::api_core::searching_and_fetching_files::FileSearchLocation;
 
 #[tokio::test]
 async fn is_searches_files() {

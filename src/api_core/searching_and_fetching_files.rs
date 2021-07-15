@@ -1,5 +1,5 @@
-use crate::endpoints::common::FileMetadataInfo;
-use crate::endpoints::Endpoint;
+use crate::api_core::common::FileMetadataInfo;
+use crate::api_core::Endpoint;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct SearchFilesResponse {

@@ -3,10 +3,41 @@
 //! token that can be retrieved in the hydrus client from the *review services* dialog.
 //! Different actions require different permissions, you can read about it in the [official docs](https://hydrusnetwork.github.io/hydrus/help/client_api.html).
 //!
-//! ## Usage Example
+//! ## Hydrus Usage Example
+//!
+//! ```
+//! # use hydrus_api::{Hydrus, Client};
+//! use std::env;
+//! use hydrus_api::api_core::searching_and_fetching_files::FileSearchLocation;
+//! use hydrus_api::wrapper::tag::Tag;
+//! use hydrus_api::wrapper::service::ServiceName;
+//! use hydrus_api::wrapper::hydrus_file::FileStatus;
+//! use hydrus_api::wrapper::page::PageIdentifier;
+//!
+//! # #[tokio::test]
+//! # async fn doctest() {
+//! let hydrus_url = env::var("HYDRUS_URL").unwrap();
+//! let access_key = env::var("HYDRUS_ACCESS_KEY").unwrap();
+//! let hydrus = Hydrus::new(Client::new(hydrus_url, access_key));
+//! let files = hydrus.search(FileSearchLocation::Archive,vec![Tag::from("character:megumin")]).await.unwrap();
+//!
+//! for mut file in files {
+//!     file.add_tags(ServiceName::my_tags(), vec![Tag::from("ark mage")]).await.unwrap();
+//! }
+//!
+//! let url = hydrus.import()
+//!     .url("https://www.pixiv.net/member_illust.php?illust_id=83406361&mode=medium")
+//!     .page(PageIdentifier::name("My Import Page"))
+//!     .add_additional_tag(ServiceName::my_tags(), Tag::from("character:megumin"))
+//!     .show_page(true)
+//!     .run().await.unwrap();
+//! # }
+//! ```
+//!
+//! ## Client Usage Example
 //! ```
 //! use hydrus_api::Client;
-//! use hydrus_api::endpoints::adding_tags::{AddTagsRequestBuilder, TagAction};
+//! use hydrus_api::api_core::adding_tags::{AddTagsRequestBuilder, TagAction};
 //! use std::env;
 //! # #[tokio::test]
 //! # async fn doctest() {
@@ -14,7 +45,7 @@
 //! Client::new(
 //!     env::var("HYDRUS_URL").unwrap(),
 //!     env::var("HYDRUS_ACCESS_KEY").unwrap(),
-//! ).unwrap();
+//! );
 //! // let's first import a file
 //! let hash = client.add_file("/path/to/my/file").await.unwrap().hash;
 //!
@@ -34,12 +65,10 @@
 #[macro_use]
 extern crate serde;
 
-pub mod client;
-pub mod endpoints;
-pub mod error;
-mod models;
-pub(crate) mod utils;
+pub use api_core::client::Client;
+pub use wrapper::hydrus::Hydrus;
 
-pub use client::Client;
-pub use models::hydrus::Hydrus;
-pub use models::*;
+pub mod api_core;
+pub mod error;
+pub(crate) mod utils;
+pub mod wrapper;

@@ -1,4 +1,4 @@
-use crate::endpoints::Endpoint;
+use crate::api_core::Endpoint;
 use serde::Serialize;
 use std::collections::HashMap;
 
@@ -72,7 +72,7 @@ pub struct AddUrlRequest {
 ///
 /// Example:
 /// ```
-/// use hydrus_api::endpoints::adding_urls::AddUrlRequestBuilder;
+/// use hydrus_api::api_core::adding_urls::AddUrlRequestBuilder;
 ///
 /// let request = AddUrlRequestBuilder::default()
 ///     .url("https://www.pixiv.net/member_illust.php?illust_id=83406361&mode=medium")

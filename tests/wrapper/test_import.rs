@@ -1,9 +1,9 @@
 use super::super::common;
-use hydrus_api::builders::import_builder::FileImport;
-use hydrus_api::page::PageIdentifier;
-use hydrus_api::service::ServiceName;
-use hydrus_api::tag::Tag;
-use hydrus_api::url::UrlType;
+use hydrus_api::wrapper::builders::import_builder::FileImport;
+use hydrus_api::wrapper::page::PageIdentifier;
+use hydrus_api::wrapper::service::ServiceName;
+use hydrus_api::wrapper::tag::Tag;
+use hydrus_api::wrapper::url::UrlType;
 
 #[tokio::test]
 async fn it_imports_file_paths() {

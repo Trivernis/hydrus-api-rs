@@ -1,4 +1,4 @@
-use crate::endpoints::common::FileIdentifier;
+use crate::api_core::common::FileIdentifier;
 use std::error::Error as StdError;
 use std::fmt;
 

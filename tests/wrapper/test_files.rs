@@ -1,8 +1,8 @@
 use super::super::common;
-use hydrus_api::endpoints::adding_tags::TagAction;
-use hydrus_api::endpoints::common::FileIdentifier;
-use hydrus_api::hydrus_file::HydrusFile;
-use hydrus_api::service::ServiceName;
+use hydrus_api::api_core::adding_tags::TagAction;
+use hydrus_api::api_core::common::FileIdentifier;
+use hydrus_api::wrapper::hydrus_file::HydrusFile;
+use hydrus_api::wrapper::service::ServiceName;
 
 async fn get_file() -> HydrusFile {
     let hydrus = common::get_hydrus();

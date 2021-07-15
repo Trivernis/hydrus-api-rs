@@ -1,8 +1,8 @@
 use super::super::common;
-use hydrus_api::endpoints::adding_tags::TagAction;
-use hydrus_api::endpoints::searching_and_fetching_files::FileSearchLocation;
-use hydrus_api::service::{ServiceName, ServiceType};
-use hydrus_api::url::UrlType;
+use hydrus_api::api_core::adding_tags::TagAction;
+use hydrus_api::api_core::searching_and_fetching_files::FileSearchLocation;
+use hydrus_api::wrapper::service::{ServiceName, ServiceType};
+use hydrus_api::wrapper::url::UrlType;
 
 #[tokio::test]
 async fn it_retrieves_version_info() {

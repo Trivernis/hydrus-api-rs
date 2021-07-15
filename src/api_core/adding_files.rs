@@ -1,5 +1,5 @@
-use crate::endpoints::common::BasicHashList;
-use crate::endpoints::Endpoint;
+use crate::api_core::common::BasicHashList;
+use crate::api_core::Endpoint;
 
 pub static STATUS_IMPORT_SUCCESS: u8 = 1;
 pub static STATUS_IMPORT_ALREADY_EXISTS: u8 = 2;

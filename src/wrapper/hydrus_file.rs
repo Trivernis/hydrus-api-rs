@@ -1,9 +1,9 @@
-use crate::endpoints::adding_tags::{AddTagsRequestBuilder, TagAction};
-use crate::endpoints::common::{FileIdentifier, FileMetadataInfo, FileRecord};
+use crate::api_core::adding_tags::{AddTagsRequestBuilder, TagAction};
+use crate::api_core::common::{FileIdentifier, FileMetadataInfo, FileRecord};
 use crate::error::{Error, Result};
-use crate::service::ServiceName;
-use crate::tag::Tag;
 use crate::utils::tag_list_to_string_list;
+use crate::wrapper::service::ServiceName;
+use crate::wrapper::tag::Tag;
 use crate::Client;
 use mime::Mime;
 use std::collections::HashMap;

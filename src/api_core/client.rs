@@ -1,22 +1,22 @@
-use crate::endpoints::access_management::{
+use crate::api_core::access_management::{
     ApiVersion, ApiVersionResponse, GetServices, GetServicesResponse, SessionKey,
     SessionKeyResponse, VerifyAccessKey, VerifyAccessKeyResponse,
 };
-use crate::endpoints::adding_files::{
+use crate::api_core::adding_files::{
     AddFile, AddFileRequest, AddFileResponse, ArchiveFiles, ArchiveFilesRequest, DeleteFiles,
     DeleteFilesRequest, UnarchiveFiles, UnarchiveFilesRequest, UndeleteFiles, UndeleteFilesRequest,
 };
-use crate::endpoints::adding_tags::{AddTags, AddTagsRequest, CleanTags, CleanTagsResponse};
-use crate::endpoints::adding_urls::{
+use crate::api_core::adding_tags::{AddTags, AddTagsRequest, CleanTags, CleanTagsResponse};
+use crate::api_core::adding_urls::{
     AddUrl, AddUrlRequest, AddUrlResponse, AssociateUrl, AssociateUrlRequest, GetUrlFiles,
     GetUrlFilesResponse, GetUrlInfo, GetUrlInfoResponse,
 };
-use crate::endpoints::common::{FileIdentifier, FileMetadataInfo, FileRecord};
-use crate::endpoints::searching_and_fetching_files::{
+use crate::api_core::common::{FileIdentifier, FileMetadataInfo, FileRecord};
+use crate::api_core::searching_and_fetching_files::{
     FileMetadata, FileMetadataResponse, FileSearchLocation, GetFile, SearchFiles,
     SearchFilesResponse,
 };
-use crate::endpoints::Endpoint;
+use crate::api_core::Endpoint;
 use crate::error::{Error, Result};
 use crate::utils::{number_list_to_json_array, string_list_to_json_array};
 use reqwest::Response;
@@ -26,6 +26,8 @@ use serde::Serialize;
 static ACCESS_KEY_HEADER: &str = "Hydrus-Client-API-Access-Key";
 
 #[derive(Clone)]
+/// A low level Client for the hydrus API. It provides basic abstraction
+/// over the REST api.
 pub struct Client {
     inner: reqwest::Client,
     base_url: String,
@@ -34,12 +36,12 @@ pub struct Client {
 
 impl Client {
     /// Creates a new client to start requests against the hydrus api.
-    pub fn new<S: AsRef<str>>(url: S, access_key: S) -> Result<Self> {
-        Ok(Self {
+    pub fn new<S: AsRef<str>>(url: S, access_key: S) -> Self {
+        Self {
             inner: reqwest::Client::new(),
             access_key: access_key.as_ref().to_string(),
             base_url: url.as_ref().to_string(),
-        })
+        }
     }
 
     /// Starts a get request to the path

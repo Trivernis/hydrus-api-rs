@@ -1,16 +1,18 @@
-use crate::builders::import_builder::ImportBuilder;
-use crate::builders::tagging_builder::TaggingBuilder;
-use crate::endpoints::common::FileIdentifier;
-use crate::endpoints::searching_and_fetching_files::FileSearchLocation;
+use crate::api_core::common::FileIdentifier;
+use crate::api_core::searching_and_fetching_files::FileSearchLocation;
 use crate::error::Result;
-use crate::hydrus_file::HydrusFile;
-use crate::models::url::Url;
-use crate::models::version::Version;
-use crate::service::Services;
-use crate::tag::Tag;
 use crate::utils::tag_list_to_string_list;
+use crate::wrapper::builders::import_builder::ImportBuilder;
+use crate::wrapper::builders::tagging_builder::TaggingBuilder;
+use crate::wrapper::hydrus_file::HydrusFile;
+use crate::wrapper::service::Services;
+use crate::wrapper::tag::Tag;
+use crate::wrapper::url::Url;
+use crate::wrapper::version::Version;
 use crate::Client;
 
+/// A high level wrapper for the hydrus API for easier management of files, tags
+/// urls etc.
 pub struct Hydrus {
     client: Client,
 }

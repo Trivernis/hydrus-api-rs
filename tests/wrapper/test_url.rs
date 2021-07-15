@@ -1,8 +1,8 @@
 use super::super::common;
-use hydrus_api::page::PageIdentifier;
-use hydrus_api::service::ServiceName;
-use hydrus_api::tag::Tag;
-use hydrus_api::url::Url;
+use hydrus_api::wrapper::page::PageIdentifier;
+use hydrus_api::wrapper::service::ServiceName;
+use hydrus_api::wrapper::tag::Tag;
+use hydrus_api::wrapper::url::Url;
 
 async fn get_url() -> Url {
     let hydrus = common::get_hydrus();
