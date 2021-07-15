@@ -1,4 +1,4 @@
-use crate::endpoints::Endpoint;
+use crate::api_core::Endpoint;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, Deserialize)]
@@ -12,7 +12,7 @@ impl Endpoint for CleanTags {
     type Request = ();
     type Response = CleanTagsResponse;
 
-    fn get_path() -> String {
+    fn path() -> String {
         String::from("add_tags/clean_tags")
     }
 }
@@ -30,7 +30,7 @@ impl Endpoint for AddTags {
     type Request = AddTagsRequest;
     type Response = ();
 
-    fn get_path() -> String {
+    fn path() -> String {
         String::from("add_tags/add_tags")
     }
 }
@@ -42,6 +42,7 @@ pub struct AddTagsRequestBuilder {
 }
 
 /// List of actions for a given tag
+#[derive(Clone, Debug, PartialOrd, PartialEq, Hash)]
 pub enum TagAction {
     /// Add to a local tag service.
     AddToLocalService,
@@ -61,6 +62,8 @@ pub enum TagAction {
     /// Rescind a petition from a tag repository.
     RescindPetitionFromRepository,
 }
+
+impl Eq for TagAction {}
 
 impl TagAction {
     fn into_id(self) -> u8 {

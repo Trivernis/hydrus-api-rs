@@ -1,4 +1,4 @@
-use crate::endpoints::Endpoint;
+use crate::api_core::Endpoint;
 use serde::Serialize;
 use std::collections::HashMap;
 
@@ -16,7 +16,7 @@ pub struct GetUrlFilesResponse {
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct UrlFileStatus {
-    pub status: u32,
+    pub status: u8,
     pub hash: String,
     pub note: String,
 }
@@ -27,7 +27,7 @@ impl Endpoint for GetUrlFiles {
     type Request = ();
     type Response = GetUrlFilesResponse;
 
-    fn get_path() -> String {
+    fn path() -> String {
         String::from("add_urls/get_url_files")
     }
 }
@@ -47,7 +47,7 @@ impl Endpoint for GetUrlInfo {
     type Request = ();
     type Response = GetUrlInfoResponse;
 
-    fn get_path() -> String {
+    fn path() -> String {
         String::from("add_urls/get_url_info")
     }
 }
@@ -72,7 +72,7 @@ pub struct AddUrlRequest {
 ///
 /// Example:
 /// ```
-/// use hydrus_api::endpoints::adding_urls::AddUrlRequestBuilder;
+/// use hydrus_api::api_core::adding_urls::AddUrlRequestBuilder;
 ///
 /// let request = AddUrlRequestBuilder::default()
 ///     .url("https://www.pixiv.net/member_illust.php?illust_id=83406361&mode=medium")
@@ -164,7 +164,7 @@ impl Endpoint for AddUrl {
     type Request = AddUrlRequest;
     type Response = AddUrlResponse;
 
-    fn get_path() -> String {
+    fn path() -> String {
         String::from("add_urls/add_url")
     }
 }
@@ -181,7 +181,7 @@ impl Endpoint for AssociateUrl {
     type Request = AssociateUrlRequest;
     type Response = ();
 
-    fn get_path() -> String {
+    fn path() -> String {
         String::from("add_urls/associate_url")
     }
 }

@@ -1,6 +1,15 @@
-use crate::endpoints::common::BasicServiceInfo;
-use crate::endpoints::Endpoint;
+use crate::api_core::common::BasicServiceInfo;
+use crate::api_core::Endpoint;
 use std::collections::HashMap;
+
+pub static SERVICE_TYPE_LOCAL_TAGS: &str = "local_tags";
+pub static SERVICE_TYPE_TAG_REPOSITORIES: &str = "tag_repositories";
+pub static SERVICE_TYPE_LOCAL_FILES: &str = "local_files";
+pub static SERVICE_TYPE_FILE_REPOSITORIES: &str = "file_repositories";
+pub static SERVICE_TYPE_ALL_LOCAL_FILES: &str = "all_local_files";
+pub static SERVICE_TYPE_ALL_KNOWN_FILES: &str = "all_known_files";
+pub static SERVICE_TYPE_ALL_KNOWN_TAGS: &str = "all_known_tags";
+pub static SERVICE_TYPE_TRASH: &str = "trash";
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct ApiVersionResponse {
@@ -14,7 +23,7 @@ impl Endpoint for ApiVersion {
     type Request = ();
     type Response = ApiVersionResponse;
 
-    fn get_path() -> String {
+    fn path() -> String {
         String::from("api_version")
     }
 }
@@ -30,7 +39,7 @@ impl Endpoint for SessionKey {
     type Request = ();
     type Response = SessionKeyResponse;
 
-    fn get_path() -> String {
+    fn path() -> String {
         String::from("session_key")
     }
 }
@@ -47,7 +56,7 @@ impl Endpoint for VerifyAccessKey {
     type Request = ();
     type Response = VerifyAccessKeyResponse;
 
-    fn get_path() -> String {
+    fn path() -> String {
         String::from("verify_access_key")
     }
 }
@@ -61,7 +70,7 @@ impl Endpoint for GetServices {
     type Request = ();
     type Response = GetServicesResponse;
 
-    fn get_path() -> String {
+    fn path() -> String {
         String::from("get_services")
     }
 }

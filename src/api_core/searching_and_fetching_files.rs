@@ -1,5 +1,5 @@
-use crate::endpoints::common::FileMetadataInfo;
-use crate::endpoints::Endpoint;
+use crate::api_core::common::FileMetadataInfo;
+use crate::api_core::Endpoint;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct SearchFilesResponse {
@@ -7,7 +7,6 @@ pub struct SearchFilesResponse {
 }
 
 pub enum FileSearchLocation {
-    All,
     Inbox,
     Archive,
 }
@@ -15,14 +14,6 @@ pub enum FileSearchLocation {
 impl FileSearchLocation {
     pub fn is_inbox(&self) -> bool {
         if let &Self::Inbox = &self {
-            true
-        } else {
-            self.is_all()
-        }
-    }
-
-    pub fn is_all(&self) -> bool {
-        if let &Self::All = &self {
             true
         } else {
             false
@@ -33,7 +24,7 @@ impl FileSearchLocation {
         if let &Self::Archive = &self {
             true
         } else {
-            self.is_all()
+            false
         }
     }
 }
@@ -44,14 +35,14 @@ impl Endpoint for SearchFiles {
     type Request = ();
     type Response = SearchFilesResponse;
 
-    fn get_path() -> String {
+    fn path() -> String {
         String::from("get_files/search_files")
     }
 }
 
-#[derive(Clone, Default, Deserialize)]
+#[derive(Clone, Debug, Default, Deserialize)]
 pub struct FileMetadataResponse {
-    metadata: Vec<FileMetadataInfo>,
+    pub metadata: Vec<FileMetadataInfo>,
 }
 
 pub struct FileMetadata;
@@ -60,7 +51,7 @@ impl Endpoint for FileMetadata {
     type Request = ();
     type Response = FileMetadataResponse;
 
-    fn get_path() -> String {
+    fn path() -> String {
         String::from("get_files/file_metadata")
     }
 }
@@ -71,7 +62,7 @@ impl Endpoint for GetFile {
     type Request = ();
     type Response = ();
 
-    fn get_path() -> String {
+    fn path() -> String {
         String::from("get_files/file")
     }
 }

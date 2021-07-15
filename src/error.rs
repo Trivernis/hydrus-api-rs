@@ -1,3 +1,4 @@
+use crate::api_core::common::FileIdentifier;
 use std::error::Error as StdError;
 use std::fmt;
 
@@ -7,6 +8,11 @@ pub type Result<T> = std::result::Result<T, Error>;
 pub enum Error {
     Reqwest(reqwest::Error),
     Hydrus(String),
+    InvalidServiceType(String),
+    ImportVetoed(String),
+    ImportFailed(String),
+    FileNotFound(FileIdentifier),
+    InvalidMime(String),
 }
 
 impl fmt::Display for Error {
@@ -14,6 +20,13 @@ impl fmt::Display for Error {
         match self {
             Self::Reqwest(e) => e.fmt(f),
             Self::Hydrus(msg) => msg.fmt(f),
+            Self::InvalidServiceType(service_type) => {
+                write!(f, "Invalid Service Type '{}'", service_type)
+            }
+            Self::ImportFailed(msg) => write!(f, "File import failed: {}", msg),
+            Self::ImportVetoed(msg) => write!(f, "File import vetoed: {}", msg),
+            Self::FileNotFound(id) => write!(f, "File {:?} not found", id),
+            Self::InvalidMime(mime) => write!(f, "Failed to parse invalid mime {}", mime),
         }
     }
 }
@@ -22,7 +35,7 @@ impl StdError for Error {
     fn source(&self) -> Option<&(dyn StdError + 'static)> {
         match self {
             Self::Reqwest(e) => e.source(),
-            Self::Hydrus(_) => None,
+            _ => None,
         }
     }
 }
