@@ -14,6 +14,7 @@ repository = "https://github.com/trivernis/hydrus-api-rs"
 serde = {version = "^1.0", features = ["derive"]}
 reqwest = {version = "0.11.4", features = ["json"]}
 log = "0.4.14"
+mime = "0.3.16"
 
 [dev-dependencies]
 env_logger = "0.8.4"

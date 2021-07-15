@@ -22,7 +22,7 @@ pub struct FileMetadataInfo {
     pub height: Option<u32>,
     pub duration: Option<u64>,
     pub has_audio: Option<bool>,
-    pub num_frames: Option<u16>,
+    pub num_frames: Option<u64>,
     pub num_words: Option<u64>,
     pub is_inbox: bool,
     pub is_local: bool,

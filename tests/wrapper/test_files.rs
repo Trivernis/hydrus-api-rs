@@ -80,3 +80,11 @@ async fn it_retrieves_content() {
 
     assert!(file.bytes.len() > 0) // assuming it exists
 }
+
+#[tokio::test]
+async fn it_retrieves_metadata() {
+    let mut file = get_file().await;
+    assert!(file.dimensions().await.unwrap().is_some());
+    assert!(file.stored_locally().await.unwrap());
+    assert!(file.duration().await.unwrap().is_none());
+}
