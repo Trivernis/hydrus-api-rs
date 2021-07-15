@@ -42,7 +42,7 @@ pub struct AddTagsRequestBuilder {
 }
 
 /// List of actions for a given tag
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialOrd, PartialEq, Hash)]
 pub enum TagAction {
     /// Add to a local tag service.
     AddToLocalService,
@@ -62,6 +62,8 @@ pub enum TagAction {
     /// Rescind a petition from a tag repository.
     RescindPetitionFromRepository,
 }
+
+impl Eq for TagAction {}
 
 impl TagAction {
     fn into_id(self) -> u8 {

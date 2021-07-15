@@ -1,4 +1,5 @@
 use crate::builders::import_builder::ImportBuilder;
+use crate::builders::tagging_builder::TaggingBuilder;
 use crate::endpoints::common::FileIdentifier;
 use crate::endpoints::searching_and_fetching_files::FileSearchLocation;
 use crate::error::Result;
@@ -66,6 +67,11 @@ impl Hydrus {
             .await?;
 
         Ok(HydrusFile::from_metadata(self.client.clone(), metadata))
+    }
+
+    /// Starts a request to bulk add tags to files
+    pub fn tagging(&self) -> TaggingBuilder {
+        TaggingBuilder::new(self.client.clone())
     }
 
     /// Searches for files that have the given tags and returns a list of hydrus files as a result

@@ -1,6 +1,7 @@
 use super::super::common;
+use hydrus_api::endpoints::adding_tags::TagAction;
 use hydrus_api::endpoints::searching_and_fetching_files::FileSearchLocation;
-use hydrus_api::service::ServiceType;
+use hydrus_api::service::{ServiceName, ServiceType};
 use hydrus_api::url::UrlType;
 
 #[tokio::test]
@@ -40,6 +41,22 @@ async fn it_searches() {
             FileSearchLocation::Archive,
             vec!["character:megumin".into()],
         )
+        .await
+        .unwrap();
+}
+
+#[tokio::test]
+async fn it_adds_tags() {
+    let hydrus = common::get_hydrus();
+    hydrus
+        .tagging()
+        .add_tag(
+            ServiceName::my_tags(),
+            TagAction::AddToLocalService,
+            "summer".into(),
+        )
+        .add_file("0000000000000000000000000000000000000000000000000000000000000000")
+        .run()
         .await
         .unwrap();
 }
