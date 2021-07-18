@@ -56,7 +56,7 @@ pub struct PageInformation {
     pub page_key: String,
     pub page_type: u32,
     #[serde(alias = "focused")]
-    pub selected: bool,
+    pub selected: Option<bool>,
     #[serde(default = "Vec::new")]
     pub pages: Vec<PageInformation>,
 }
