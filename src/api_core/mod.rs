@@ -7,6 +7,7 @@ pub mod adding_tags;
 pub mod adding_urls;
 pub mod client;
 pub mod common;
+pub mod managing_pages;
 pub mod searching_and_fetching_files;
 
 pub(crate) trait Endpoint {

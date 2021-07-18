@@ -12,6 +12,7 @@ use crate::api_core::adding_urls::{
     GetUrlFilesResponse, GetUrlInfo, GetUrlInfoResponse,
 };
 use crate::api_core::common::{FileIdentifier, FileMetadataInfo, FileRecord};
+use crate::api_core::managing_pages::{GetPage, GetPagesResponse};
 use crate::api_core::searching_and_fetching_files::{
     FileMetadata, FileMetadataResponse, FileSearchLocation, GetFile, SearchFiles,
     SearchFilesResponse,
@@ -306,5 +307,10 @@ impl Client {
         .await?;
 
         Ok(())
+    }
+
+    /// Returns all pages of the client
+    pub async fn get_pages(&self) -> Result<GetPagesResponse> {
+        self.get_and_parse::<GetPage, ()>(&()).await
     }
 }
