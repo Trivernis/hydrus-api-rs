@@ -33,3 +33,19 @@ impl Endpoint for GetPageInfo {
         String::from("manage_pages/get_page_info")
     }
 }
+
+#[derive(Clone, Debug, Serialize)]
+pub struct FocusPageRequest {
+    pub page_key: String,
+}
+
+pub struct FocusPage;
+
+impl Endpoint for FocusPage {
+    type Request = FocusPageRequest;
+    type Response = ();
+
+    fn path() -> String {
+        String::from("manage_pages/focus_page")
+    }
+}
