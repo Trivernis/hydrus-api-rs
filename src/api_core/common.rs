@@ -49,3 +49,14 @@ pub struct FileRecord {
     pub bytes: Vec<u8>,
     pub mime_type: String,
 }
+
+#[derive(Clone, Debug, Deserialize)]
+pub struct PageInformation {
+    pub name: String,
+    pub page_key: String,
+    pub page_type: u32,
+    #[serde(alias = "focused")]
+    pub selected: Option<bool>,
+    #[serde(default = "Vec::new")]
+    pub pages: Vec<PageInformation>,
+}

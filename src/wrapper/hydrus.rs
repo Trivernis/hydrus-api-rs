@@ -5,6 +5,7 @@ use crate::utils::tag_list_to_string_list;
 use crate::wrapper::builders::import_builder::ImportBuilder;
 use crate::wrapper::builders::tagging_builder::TaggingBuilder;
 use crate::wrapper::hydrus_file::HydrusFile;
+use crate::wrapper::page::HydrusPage;
 use crate::wrapper::service::Services;
 use crate::wrapper::tag::Tag;
 use crate::wrapper::url::Url;
@@ -93,5 +94,25 @@ impl Hydrus {
             .collect();
 
         Ok(files)
+    }
+
+    /// Returns a hydrus page by page key
+    pub async fn page<S: AsRef<str>>(&self, page_key: S) -> Result<HydrusPage> {
+        let info_response = self.client.get_page_info(page_key).await?;
+
+        Ok(HydrusPage::from_info(
+            self.client.clone(),
+            info_response.page_info,
+        ))
+    }
+
+    /// Returns the root page in the client
+    pub async fn root_page(&self) -> Result<HydrusPage> {
+        let pages_response = self.client.get_pages().await?;
+
+        Ok(HydrusPage::from_info(
+            self.client.clone(),
+            pages_response.pages,
+        ))
     }
 }

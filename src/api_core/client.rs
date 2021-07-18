@@ -12,6 +12,9 @@ use crate::api_core::adding_urls::{
     GetUrlFilesResponse, GetUrlInfo, GetUrlInfoResponse,
 };
 use crate::api_core::common::{FileIdentifier, FileMetadataInfo, FileRecord};
+use crate::api_core::managing_pages::{
+    FocusPage, FocusPageRequest, GetPageInfo, GetPageInfoResponse, GetPages, GetPagesResponse,
+};
 use crate::api_core::searching_and_fetching_files::{
     FileMetadata, FileMetadataResponse, FileSearchLocation, GetFile, SearchFiles,
     SearchFilesResponse,
@@ -302,6 +305,27 @@ impl Client {
             hashes,
             urls_to_add: vec![],
             urls_to_delete: urls,
+        })
+        .await?;
+
+        Ok(())
+    }
+
+    /// Returns all pages of the client
+    pub async fn get_pages(&self) -> Result<GetPagesResponse> {
+        self.get_and_parse::<GetPages, ()>(&()).await
+    }
+
+    /// Returns information about a single page
+    pub async fn get_page_info<S: AsRef<str>>(&self, page_key: S) -> Result<GetPageInfoResponse> {
+        self.get_and_parse::<GetPageInfo, [(&str, &str)]>(&[("page_key", page_key.as_ref())])
+            .await
+    }
+
+    /// Focuses a page in the client
+    pub async fn focus_page<S: ToString>(&self, page_key: S) -> Result<()> {
+        self.post::<FocusPage>(FocusPageRequest {
+            page_key: page_key.to_string(),
         })
         .await?;
 
