@@ -2,6 +2,7 @@ use crate::api_core::adding_urls::{
     URL_TYPE_FILE, URL_TYPE_GALLERY, URL_TYPE_POST, URL_TYPE_WATCHABLE,
 };
 use crate::error::Result;
+use crate::wrapper::address::Address;
 use crate::wrapper::builders::import_builder::UrlImportBuilder;
 use crate::wrapper::hydrus_file::HydrusFile;
 use crate::Client;
@@ -57,6 +58,16 @@ impl Url {
     /// Creates an import builder for the url
     pub fn import(&mut self) -> UrlImportBuilder {
         UrlImportBuilder::new(self.client.clone(), &self.url)
+    }
+
+    /// Returns the address to manipulate cookies for this url
+    pub fn address(&self) -> Address {
+        let url = self
+            .normalised_url
+            .trim_start_matches("http://")
+            .trim_start_matches("https://");
+
+        Address::from_str(self.client.clone(), url)
     }
 
     /// Associates the url with a list of file hashes

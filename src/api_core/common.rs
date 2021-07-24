@@ -80,3 +80,21 @@ impl From<String> for OptionalStringNumber {
         Self::String(value)
     }
 }
+
+impl OptionalStringNumber {
+    pub fn string(&self) -> Option<&str> {
+        if let Self::String(s) = &self {
+            Some(s)
+        } else {
+            None
+        }
+    }
+
+    pub fn number(&self) -> Option<u64> {
+        if let Self::Number(n) = &self {
+            Some(*n)
+        } else {
+            None
+        }
+    }
+}

@@ -2,6 +2,7 @@ use crate::api_core::common::FileIdentifier;
 use crate::api_core::searching_and_fetching_files::FileSearchLocation;
 use crate::error::Result;
 use crate::utils::tag_list_to_string_list;
+use crate::wrapper::address::Address;
 use crate::wrapper::builders::import_builder::ImportBuilder;
 use crate::wrapper::builders::tagging_builder::TaggingBuilder;
 use crate::wrapper::hydrus_file::HydrusFile;
@@ -45,6 +46,11 @@ impl Hydrus {
         ImportBuilder {
             client: self.client.clone(),
         }
+    }
+
+    /// Returns the address as an object that can be used to get and set cookies
+    pub fn address<S: AsRef<str>>(&self, address: S) -> Address {
+        Address::from_str(self.client.clone(), address.as_ref())
     }
 
     /// Returns information about a given url in an object that allows
