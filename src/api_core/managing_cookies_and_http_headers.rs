@@ -83,3 +83,20 @@ impl CookieBuilder {
         [self.name, self.value, self.domain, self.path, self.expires]
     }
 }
+
+#[derive(Clone, Debug, Serialize)]
+pub struct SetUserAgentRequest {
+    #[serde(rename = "user-agent")]
+    pub user_agent: String,
+}
+
+pub struct SetUserAgent;
+
+impl Endpoint for SetUserAgent {
+    type Request = SetUserAgentRequest;
+    type Response = ();
+
+    fn path() -> String {
+        String::from("manage_headers/set_user_agent")
+    }
+}

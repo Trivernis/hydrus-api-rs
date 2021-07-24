@@ -13,7 +13,8 @@ use crate::api_core::adding_urls::{
 };
 use crate::api_core::common::{FileIdentifier, FileMetadataInfo, FileRecord, OptionalStringNumber};
 use crate::api_core::managing_cookies_and_http_headers::{
-    GetCookies, GetCookiesResponse, SetCookies, SetCookiesRequest,
+    GetCookies, GetCookiesResponse, SetCookies, SetCookiesRequest, SetUserAgent,
+    SetUserAgentRequest,
 };
 use crate::api_core::managing_pages::{
     FocusPage, FocusPageRequest, GetPageInfo, GetPageInfoResponse, GetPages, GetPagesResponse,
@@ -347,6 +348,16 @@ impl Client {
     pub async fn set_cookies(&self, cookies: Vec<[OptionalStringNumber; 5]>) -> Result<()> {
         self.post::<SetCookies>(SetCookiesRequest { cookies })
             .await?;
+
+        Ok(())
+    }
+
+    /// Sets the user agent that is being used for every request hydrus starts
+    pub async fn set_user_agent<S: ToString>(&self, user_agent: S) -> Result<()> {
+        self.post::<SetUserAgent>(SetUserAgentRequest {
+            user_agent: user_agent.to_string(),
+        })
+        .await?;
 
         Ok(())
     }

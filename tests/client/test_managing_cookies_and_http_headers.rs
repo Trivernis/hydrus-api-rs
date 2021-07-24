@@ -18,3 +18,12 @@ async fn it_sets_cookies_for_a_domain() {
         .build();
     client.set_cookies(vec![cookie]).await.unwrap();
 }
+
+#[tokio::test]
+async fn it_sets_the_user_agent() {
+    let client = common::get_client();
+    client
+        .set_user_agent("Mozilla/5.0 (compatible; Hydrus Client)")
+        .await
+        .unwrap();
+}
