@@ -60,3 +60,23 @@ pub struct PageInformation {
     #[serde(default = "Vec::new")]
     pub pages: Vec<PageInformation>,
 }
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum OptionalStringNumber {
+    String(String),
+    Number(u64),
+    None,
+}
+
+impl From<u64> for OptionalStringNumber {
+    fn from(value: u64) -> Self {
+        Self::Number(value)
+    }
+}
+
+impl From<String> for OptionalStringNumber {
+    fn from(value: String) -> Self {
+        Self::String(value)
+    }
+}
