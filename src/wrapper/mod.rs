@@ -1,3 +1,4 @@
+pub mod address;
 pub mod builders;
 pub mod hydrus;
 pub mod hydrus_file;

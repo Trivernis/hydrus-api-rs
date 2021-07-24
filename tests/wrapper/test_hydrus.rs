@@ -60,3 +60,12 @@ async fn it_adds_tags() {
         .await
         .unwrap();
 }
+
+#[tokio::test]
+async fn it_sets_the_user_agent() {
+    let hydrus = common::get_hydrus();
+    hydrus
+        .set_user_agent("Mozilla/5.0 (compatible; Hydrus Client)")
+        .await
+        .unwrap();
+}

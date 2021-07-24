@@ -11,7 +11,11 @@ use crate::api_core::adding_urls::{
     AddUrl, AddUrlRequest, AddUrlResponse, AssociateUrl, AssociateUrlRequest, GetUrlFiles,
     GetUrlFilesResponse, GetUrlInfo, GetUrlInfoResponse,
 };
-use crate::api_core::common::{FileIdentifier, FileMetadataInfo, FileRecord};
+use crate::api_core::common::{FileIdentifier, FileMetadataInfo, FileRecord, OptionalStringNumber};
+use crate::api_core::managing_cookies_and_http_headers::{
+    GetCookies, GetCookiesResponse, SetCookies, SetCookiesRequest, SetUserAgent,
+    SetUserAgentRequest,
+};
 use crate::api_core::managing_pages::{
     FocusPage, FocusPageRequest, GetPageInfo, GetPageInfoResponse, GetPages, GetPagesResponse,
 };
@@ -326,6 +330,32 @@ impl Client {
     pub async fn focus_page<S: ToString>(&self, page_key: S) -> Result<()> {
         self.post::<FocusPage>(FocusPageRequest {
             page_key: page_key.to_string(),
+        })
+        .await?;
+
+        Ok(())
+    }
+
+    /// Returns all cookies for the given domain
+    pub async fn get_cookies<S: AsRef<str>>(&self, domain: S) -> Result<GetCookiesResponse> {
+        self.get_and_parse::<GetCookies, [(&str, &str)]>(&[("domain", domain.as_ref())])
+            .await
+    }
+
+    /// Sets some cookies for some websites.
+    /// Each entry needs to be in the format `[<name>, <value>, <domain>, <path>, <expires>]`
+    /// with the types `[String, String, String, String, u64]`
+    pub async fn set_cookies(&self, cookies: Vec<[OptionalStringNumber; 5]>) -> Result<()> {
+        self.post::<SetCookies>(SetCookiesRequest { cookies })
+            .await?;
+
+        Ok(())
+    }
+
+    /// Sets the user agent that is being used for every request hydrus starts
+    pub async fn set_user_agent<S: ToString>(&self, user_agent: S) -> Result<()> {
+        self.post::<SetUserAgent>(SetUserAgentRequest {
+            user_agent: user_agent.to_string(),
         })
         .await?;
 
