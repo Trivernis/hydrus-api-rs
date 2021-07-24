@@ -121,4 +121,9 @@ impl Hydrus {
             pages_response.pages,
         ))
     }
+
+    /// Sets the user agent hydrus uses for http requests
+    pub async fn set_user_agent<S: ToString>(&self, user_agent: S) -> Result<()> {
+        self.client.set_user_agent(user_agent).await
+    }
 }
