@@ -35,6 +35,7 @@ static ACCESS_KEY_HEADER: &str = "Hydrus-Client-API-Access-Key";
 #[derive(Clone)]
 /// A low level Client for the hydrus API. It provides basic abstraction
 /// over the REST api.
+#[derive(Debug)]
 pub struct Client {
     inner: reqwest::Client,
     base_url: String,
@@ -53,6 +54,7 @@ impl Client {
 
     /// Starts a get request to the path
     async fn get<E: Endpoint, Q: Serialize + ?Sized>(&self, query: &Q) -> Result<Response> {
+        log::debug!("GET request to {}", E::path());
         let response = self
             .inner
             .get(format!("{}/{}", self.base_url, E::path()))
@@ -76,6 +78,7 @@ impl Client {
 
     /// Stats a post request to the path associated with the Endpoint Type
     async fn post<E: Endpoint>(&self, body: E::Request) -> Result<Response> {
+        log::debug!("POST request to {}", E::path());
         let response = self
             .inner
             .post(format!("{}/{}", self.base_url, E::path()))
@@ -96,6 +99,7 @@ impl Client {
 
     /// Stats a post request to the path associated with the return type
     async fn post_binary<E: Endpoint>(&self, data: Vec<u8>) -> Result<E::Response> {
+        log::debug!("Binary POST request to {}", E::path());
         let response = self
             .inner
             .post(format!("{}/{}", self.base_url, E::path()))
@@ -113,6 +117,7 @@ impl Client {
     async fn extract_error(response: Response) -> Result<Response> {
         if !response.status().is_success() {
             let msg = response.text().await?;
+            log::error!("API returned error '{}'", msg);
             Err(Error::Hydrus(msg))
         } else {
             Ok(response)
@@ -126,39 +131,45 @@ impl Client {
 
     /// Returns the current API version. It's being incremented every time the API changes.
     pub async fn api_version(&self) -> Result<ApiVersionResponse> {
+        log::trace!("Getting api version");
         self.get_and_parse::<ApiVersion, ()>(&()).await
     }
 
     /// Creates a new session key
     pub async fn session_key(&self) -> Result<SessionKeyResponse> {
+        log::trace!("Getting session key");
         self.get_and_parse::<SessionKey, ()>(&()).await
     }
 
     /// Verifies if the access key is valid and returns some information about its permissions
     pub async fn verify_access_key(&self) -> Result<VerifyAccessKeyResponse> {
+        log::trace!("Verifying access key");
         self.get_and_parse::<VerifyAccessKey, ()>(&()).await
     }
 
     /// Returns the list of tag and file services of the client
     pub async fn get_services(&self) -> Result<GetServicesResponse> {
+        log::trace!("Getting services");
         self.get_and_parse::<GetServices, ()>(&()).await
     }
 
     /// Adds a file to hydrus
-    pub async fn add_file<S: AsRef<str>>(&self, path: S) -> Result<AddFileResponse> {
-        self.post_and_parse::<AddFile>(AddFileRequest {
-            path: path.as_ref().to_string(),
-        })
-        .await
+    pub async fn add_file<S: ToString>(&self, path: S) -> Result<AddFileResponse> {
+        let path = path.to_string();
+        log::trace!("Adding file {}", path);
+        self.post_and_parse::<AddFile>(AddFileRequest { path })
+            .await
     }
 
     /// Adds a file from binary data to hydrus
     pub async fn add_binary_file(&self, data: Vec<u8>) -> Result<AddFileResponse> {
+        log::trace!("Adding binary file");
         self.post_binary::<AddFile>(data).await
     }
 
     /// Moves files with matching hashes to the trash
     pub async fn delete_files(&self, hashes: Vec<String>) -> Result<()> {
+        log::trace!("Deleting files {:?}", hashes);
         self.post::<DeleteFiles>(DeleteFilesRequest { hashes })
             .await?;
 
@@ -167,6 +178,7 @@ impl Client {
 
     /// Pulls files out of the trash by hash
     pub async fn undelete_files(&self, hashes: Vec<String>) -> Result<()> {
+        log::trace!("Undeleting files {:?}", hashes);
         self.post::<UndeleteFiles>(UndeleteFilesRequest { hashes })
             .await?;
 
@@ -175,6 +187,7 @@ impl Client {
 
     /// Moves files from the inbox into the archive
     pub async fn archive_files(&self, hashes: Vec<String>) -> Result<()> {
+        log::trace!("Archiving files {:?}", hashes);
         self.post::<ArchiveFiles>(ArchiveFilesRequest { hashes })
             .await?;
 
@@ -183,6 +196,7 @@ impl Client {
 
     /// Moves files from the archive into the inbox
     pub async fn unarchive_files(&self, hashes: Vec<String>) -> Result<()> {
+        log::trace!("Unarchiving files {:?}", hashes);
         self.post::<UnarchiveFiles>(UnarchiveFilesRequest { hashes })
             .await?;
 
@@ -191,6 +205,7 @@ impl Client {
 
     /// Returns the list of tags as the client would see them in a human friendly order
     pub async fn clean_tags(&self, tags: Vec<String>) -> Result<CleanTagsResponse> {
+        log::trace!("Cleaning tags {:?}", tags);
         self.get_and_parse::<CleanTags, [(&str, String)]>(&[(
             "tags",
             string_list_to_json_array(tags),
@@ -200,6 +215,7 @@ impl Client {
 
     /// Adds tags to files with the given hashes
     pub async fn add_tags(&self, request: AddTagsRequest) -> Result<()> {
+        log::trace!("Adding tags {:?}", request);
         self.post::<AddTags>(request).await?;
 
         Ok(())
@@ -211,6 +227,7 @@ impl Client {
         tags: Vec<String>,
         location: FileSearchLocation,
     ) -> Result<SearchFilesResponse> {
+        log::trace!("Searching for files in {:?} with tags {:?}", location, tags);
         self.get_and_parse::<SearchFiles, [(&str, String)]>(&[
             ("tags", string_list_to_json_array(tags)),
             ("system_inbox", location.is_inbox().to_string()),
@@ -225,6 +242,11 @@ impl Client {
         file_ids: Vec<u64>,
         hashes: Vec<String>,
     ) -> Result<FileMetadataResponse> {
+        log::trace!(
+            "Getting file info for ids {:?} or hashes {:?}",
+            file_ids,
+            hashes
+        );
         let query = if file_ids.len() > 0 {
             ("file_ids", number_list_to_json_array(file_ids))
         } else {
@@ -237,9 +259,10 @@ impl Client {
     /// Returns the metadata for a single file identifier
     pub async fn get_file_metadata_by_identifier(
         &self,
-        identifier: FileIdentifier,
+        id: FileIdentifier,
     ) -> Result<FileMetadataInfo> {
-        let mut response = match identifier.clone() {
+        log::trace!("Getting file metadata {:?}", id);
+        let mut response = match id.clone() {
             FileIdentifier::ID(id) => self.get_file_metadata(vec![id], vec![]).await?,
             FileIdentifier::Hash(hash) => self.get_file_metadata(vec![], vec![hash]).await?,
         };
@@ -247,11 +270,12 @@ impl Client {
         response
             .metadata
             .pop()
-            .ok_or_else(|| Error::FileNotFound(identifier))
+            .ok_or_else(|| Error::FileNotFound(id))
     }
 
     /// Returns the bytes of a file from hydrus
     pub async fn get_file(&self, id: FileIdentifier) -> Result<FileRecord> {
+        log::trace!("Getting file {:?}", id);
         let response = match id {
             FileIdentifier::ID(id) => {
                 self.get::<GetFile, [(&str, u64)]>(&[("file_id", id)])
@@ -276,23 +300,27 @@ impl Client {
 
     /// Returns all files associated with the given url
     pub async fn get_url_files<S: AsRef<str>>(&self, url: S) -> Result<GetUrlFilesResponse> {
+        log::trace!("Getting files for url {}", url.as_ref());
         self.get_and_parse::<GetUrlFiles, [(&str, &str)]>(&[("url", url.as_ref())])
             .await
     }
 
     /// Returns information about the given url
     pub async fn get_url_info<S: AsRef<str>>(&self, url: S) -> Result<GetUrlInfoResponse> {
+        log::trace!("Getting info for url {}", url.as_ref());
         self.get_and_parse::<GetUrlInfo, [(&str, &str)]>(&[("url", url.as_ref())])
             .await
     }
 
     /// Adds an url to hydrus, optionally with additional tags and a destination page
     pub async fn add_url(&self, request: AddUrlRequest) -> Result<AddUrlResponse> {
+        log::trace!("Adding url {:?}", request);
         self.post_and_parse::<AddUrl>(request).await
     }
 
     /// Associates urls with the given file hashes
     pub async fn associate_urls(&self, urls: Vec<String>, hashes: Vec<String>) -> Result<()> {
+        log::trace!("Associating urls {:?} with hashes {:?}", urls, hashes);
         self.post::<AssociateUrl>(AssociateUrlRequest {
             hashes,
             urls_to_add: urls,
@@ -305,6 +333,7 @@ impl Client {
 
     /// Disassociates urls with the given file hashes
     pub async fn disassociate_urls(&self, urls: Vec<String>, hashes: Vec<String>) -> Result<()> {
+        log::trace!("Disassociating urls {:?} with hashes {:?}", urls, hashes);
         self.post::<AssociateUrl>(AssociateUrlRequest {
             hashes,
             urls_to_add: vec![],
@@ -317,27 +346,30 @@ impl Client {
 
     /// Returns all pages of the client
     pub async fn get_pages(&self) -> Result<GetPagesResponse> {
+        log::trace!("Getting pages");
         self.get_and_parse::<GetPages, ()>(&()).await
     }
 
     /// Returns information about a single page
     pub async fn get_page_info<S: AsRef<str>>(&self, page_key: S) -> Result<GetPageInfoResponse> {
+        log::trace!("Getting information for page {}", page_key.as_ref());
         self.get_and_parse::<GetPageInfo, [(&str, &str)]>(&[("page_key", page_key.as_ref())])
             .await
     }
 
     /// Focuses a page in the client
     pub async fn focus_page<S: ToString>(&self, page_key: S) -> Result<()> {
-        self.post::<FocusPage>(FocusPageRequest {
-            page_key: page_key.to_string(),
-        })
-        .await?;
+        let page_key = page_key.to_string();
+        log::trace!("Focussing page {}", page_key);
+        self.post::<FocusPage>(FocusPageRequest { page_key })
+            .await?;
 
         Ok(())
     }
 
     /// Returns all cookies for the given domain
     pub async fn get_cookies<S: AsRef<str>>(&self, domain: S) -> Result<GetCookiesResponse> {
+        log::trace!("Getting cookies");
         self.get_and_parse::<GetCookies, [(&str, &str)]>(&[("domain", domain.as_ref())])
             .await
     }
@@ -346,6 +378,7 @@ impl Client {
     /// Each entry needs to be in the format `[<name>, <value>, <domain>, <path>, <expires>]`
     /// with the types `[String, String, String, String, u64]`
     pub async fn set_cookies(&self, cookies: Vec<[OptionalStringNumber; 5]>) -> Result<()> {
+        log::trace!("Setting cookies {:?}", cookies);
         self.post::<SetCookies>(SetCookiesRequest { cookies })
             .await?;
 
@@ -354,10 +387,10 @@ impl Client {
 
     /// Sets the user agent that is being used for every request hydrus starts
     pub async fn set_user_agent<S: ToString>(&self, user_agent: S) -> Result<()> {
-        self.post::<SetUserAgent>(SetUserAgentRequest {
-            user_agent: user_agent.to_string(),
-        })
-        .await?;
+        let user_agent = user_agent.to_string();
+        log::trace!("Setting user agent to {}", user_agent);
+        self.post::<SetUserAgent>(SetUserAgentRequest { user_agent })
+            .await?;
 
         Ok(())
     }

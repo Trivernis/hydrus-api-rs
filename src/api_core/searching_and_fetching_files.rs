@@ -6,6 +6,7 @@ pub struct SearchFilesResponse {
     pub file_ids: Vec<u64>,
 }
 
+#[derive(Clone, Debug)]
 pub enum FileSearchLocation {
     Inbox,
     Archive,
