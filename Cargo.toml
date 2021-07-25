@@ -1,6 +1,6 @@
 [package]
 name = "hydrus-api"
-version = "0.3.4"
+version = "0.3.5"
 authors = ["trivernis <trivernis@protonmail.com>"]
 edition = "2018"
 license = "Apache-2.0"

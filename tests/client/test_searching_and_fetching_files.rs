@@ -24,6 +24,13 @@ async fn it_fetches_file_metadata() {
 }
 
 #[tokio::test]
+async fn it_fetches_file_metadata_by_id() {
+    let client = common::get_client();
+    let response = client.get_file_metadata(vec![1], vec![]).await;
+    assert!(response.is_ok()); // Even if the file doesn't exist it still returns some information about it
+}
+
+#[tokio::test]
 async fn it_fetches_single_files() {
     let client = common::get_client();
     let response = client
