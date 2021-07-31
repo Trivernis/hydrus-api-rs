@@ -1,4 +1,4 @@
-use crate::api_core::common::PageInformation;
+use crate::api_core::common::{FileIdentifier, PageInformation};
 use crate::error::Result;
 use crate::Client;
 
@@ -32,10 +32,35 @@ impl HydrusPage {
     pub async fn focus(&self) -> Result<()> {
         self.client.focus_page(&self.key).await
     }
-    
+
     /// Returns an identifier of the page
     pub fn id(&self) -> PageIdentifier {
         PageIdentifier::key(&self.key)
+    }
+
+    /// Adds files to a page
+    pub async fn add_files(&self, files: Vec<FileIdentifier>) -> Result<()> {
+        let mut hashes = Vec::new();
+        let mut ids = Vec::new();
+
+        for file in files {
+            match file {
+                FileIdentifier::ID(id) => ids.push(id),
+                FileIdentifier::Hash(hash) => hashes.push(hash),
+            }
+        }
+        // resolve file ids to hashes
+        if ids.len() > 0 && hashes.len() > 0 {
+            while let Some(id) = ids.pop() {
+                let metadata = self
+                    .client
+                    .get_file_metadata_by_identifier(FileIdentifier::ID(id))
+                    .await?;
+                hashes.push(metadata.hash);
+            }
+        }
+
+        self.client.add_files_to_page(&self.key, ids, hashes).await
     }
 }
 
