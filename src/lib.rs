@@ -8,7 +8,6 @@
 //! ```
 //! # use hydrus_api::{Hydrus, Client};
 //! use std::env;
-//! use hydrus_api::api_core::searching_and_fetching_files::FileSearchLocation;
 //! use hydrus_api::wrapper::tag::Tag;
 //! use hydrus_api::wrapper::service::ServiceName;
 //! use hydrus_api::wrapper::hydrus_file::FileStatus;
@@ -19,7 +18,7 @@
 //! let hydrus_url = env::var("HYDRUS_URL").unwrap();
 //! let access_key = env::var("HYDRUS_ACCESS_KEY").unwrap();
 //! let hydrus = Hydrus::new(Client::new(hydrus_url, access_key));
-//! let files = hydrus.search(FileSearchLocation::Archive,vec![Tag::from("character:megumin")]).await.unwrap();
+//! let files = hydrus.search(vec![Tag::from("character:megumin")]).await.unwrap();
 //!
 //! for mut file in files {
 //!     file.add_tags(ServiceName::my_tags(), vec![Tag::from("ark mage")]).await.unwrap();

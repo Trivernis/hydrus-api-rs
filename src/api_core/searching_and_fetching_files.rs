@@ -6,30 +6,6 @@ pub struct SearchFilesResponse {
     pub file_ids: Vec<u64>,
 }
 
-#[derive(Clone, Debug)]
-pub enum FileSearchLocation {
-    Inbox,
-    Archive,
-}
-
-impl FileSearchLocation {
-    pub fn is_inbox(&self) -> bool {
-        if let &Self::Inbox = &self {
-            true
-        } else {
-            false
-        }
-    }
-
-    pub fn is_archive(&self) -> bool {
-        if let &Self::Archive = &self {
-            true
-        } else {
-            false
-        }
-    }
-}
-
 pub struct SearchFiles;
 
 impl Endpoint for SearchFiles {

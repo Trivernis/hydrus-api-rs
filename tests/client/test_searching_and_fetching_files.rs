@@ -1,12 +1,11 @@
 use super::super::common;
 use hydrus_api::api_core::common::FileIdentifier;
-use hydrus_api::api_core::searching_and_fetching_files::FileSearchLocation;
 
 #[tokio::test]
 async fn is_searches_files() {
     let client = common::get_client();
     client
-        .search_files(vec!["beach".to_string()], FileSearchLocation::Archive)
+        .search_files(vec!["beach".to_string()])
         .await
         .unwrap();
 }

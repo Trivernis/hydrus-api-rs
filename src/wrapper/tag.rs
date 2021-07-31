@@ -1,5 +1,6 @@
 #[derive(Clone, Debug)]
 pub struct Tag {
+    pub negated: bool,
     pub name: String,
     pub namespace: Option<String>,
 }
@@ -9,14 +10,17 @@ where
     S: AsRef<str>,
 {
     fn from(value: S) -> Self {
-        let value = value.as_ref();
+        let value = value.as_ref().trim();
+        let negated = value.strip_prefix("-").is_some();
         if let Some((namespace, tag)) = value.split_once(":") {
             Self {
+                negated,
                 namespace: Some(namespace.to_string()),
                 name: tag.to_string(),
             }
         } else {
             Self {
+                negated,
                 name: value.to_string(),
                 namespace: None,
             }
@@ -26,10 +30,11 @@ where
 
 impl ToString for Tag {
     fn to_string(&self) -> String {
+        let negation = if self.negated { "-" } else { "" };
         if let Some(namespace) = &self.namespace {
-            format!("{}:{}", namespace, self.name)
+            format!("{}{}:{}", negation, namespace, self.name)
         } else {
-            self.name.clone()
+            format!("{}{}", negation, self.name)
         }
     }
 }
