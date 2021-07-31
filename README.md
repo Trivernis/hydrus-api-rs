@@ -33,7 +33,7 @@ async fn main() {
     let access_key = env::var("HYDRUS_ACCESS_KEY").unwrap();
     
     let hydrus = Hydrus::new(Client::new(hydrus_url, access_key));
-    let files = hydrus.search(FileSearchLocation::Archive,vec![
+    let files = hydrus.search(vec![
         Tag::from("character:megumin"),
         SystemTagBuilder::new().archive().build(),
         SystemTagBuilder::new().number_of_tags(Comparator::Greater, 12).build(),
