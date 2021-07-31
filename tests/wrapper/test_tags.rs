@@ -22,6 +22,12 @@ async fn it_returns_everything() {
 }
 
 #[tokio::test]
+async fn it_returns_everything_negated() {
+    let tag = SystemTagBuilder::new().everything().negate().build();
+    retrieve_single_tag(tag).await.unwrap();
+}
+
+#[tokio::test]
 async fn it_returns_the_inbox() {
     let tag = SystemTagBuilder::new().inbox().build();
     retrieve_single_tag(tag).await.unwrap();
