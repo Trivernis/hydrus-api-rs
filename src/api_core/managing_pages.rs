@@ -49,3 +49,23 @@ impl Endpoint for FocusPage {
         String::from("manage_pages/focus_page")
     }
 }
+
+#[derive(Clone, Debug, Serialize)]
+pub struct AddFilesRequest {
+    pub page_key: String,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub file_ids: Vec<u64>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub hashes: Vec<String>,
+}
+
+pub struct AddFiles;
+
+impl Endpoint for AddFiles {
+    type Request = AddFilesRequest;
+    type Response = ();
+
+    fn path() -> String {
+        String::from("manage_pages/add_files")
+    }
+}

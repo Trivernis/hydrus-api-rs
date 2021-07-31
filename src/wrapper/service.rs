@@ -8,6 +8,7 @@ use crate::error::Error;
 use crate::Client;
 use std::collections::HashMap;
 use std::convert::TryFrom;
+use std::fmt::{Display, Formatter};
 
 #[derive(Clone, PartialOrd, PartialEq, Hash)]
 pub enum ServiceType {
@@ -84,6 +85,12 @@ impl ServiceName {
 
     pub fn all_known_files() -> Self {
         Self(String::from("all known files"))
+    }
+}
+
+impl Display for ServiceName {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
     }
 }
 

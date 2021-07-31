@@ -1,6 +1,5 @@
 use super::super::common;
 use hydrus_api::api_core::adding_tags::TagAction;
-use hydrus_api::api_core::searching_and_fetching_files::FileSearchLocation;
 use hydrus_api::wrapper::service::{ServiceName, ServiceType};
 use hydrus_api::wrapper::url::UrlType;
 
@@ -37,10 +36,7 @@ async fn it_retrieves_url_information() {
 async fn it_searches() {
     let hydrus = common::get_hydrus();
     hydrus
-        .search(
-            FileSearchLocation::Archive,
-            vec!["character:megumin".into()],
-        )
+        .search(vec!["character:megumin".into()])
         .await
         .unwrap();
 }

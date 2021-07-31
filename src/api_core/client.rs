@@ -17,11 +17,11 @@ use crate::api_core::managing_cookies_and_http_headers::{
     SetUserAgentRequest,
 };
 use crate::api_core::managing_pages::{
-    FocusPage, FocusPageRequest, GetPageInfo, GetPageInfoResponse, GetPages, GetPagesResponse,
+    AddFiles, AddFilesRequest, FocusPage, FocusPageRequest, GetPageInfo, GetPageInfoResponse,
+    GetPages, GetPagesResponse,
 };
 use crate::api_core::searching_and_fetching_files::{
-    FileMetadata, FileMetadataResponse, FileSearchLocation, GetFile, SearchFiles,
-    SearchFilesResponse,
+    FileMetadata, FileMetadataResponse, GetFile, SearchFiles, SearchFilesResponse,
 };
 use crate::api_core::Endpoint;
 use crate::error::{Error, Result};
@@ -222,17 +222,12 @@ impl Client {
     }
 
     /// Searches for files in the inbox, the archive or both
-    pub async fn search_files(
-        &self,
-        tags: Vec<String>,
-        location: FileSearchLocation,
-    ) -> Result<SearchFilesResponse> {
-        log::trace!("Searching for files in {:?} with tags {:?}", location, tags);
-        self.get_and_parse::<SearchFiles, [(&str, String)]>(&[
-            ("tags", string_list_to_json_array(tags)),
-            ("system_inbox", location.is_inbox().to_string()),
-            ("system_archive", location.is_archive().to_string()),
-        ])
+    pub async fn search_files(&self, tags: Vec<String>) -> Result<SearchFilesResponse> {
+        log::trace!("Searching for files with tags {:?}", tags);
+        self.get_and_parse::<SearchFiles, [(&str, String)]>(&[(
+            "tags",
+            string_list_to_json_array(tags),
+        )])
         .await
     }
 
@@ -363,6 +358,30 @@ impl Client {
         log::trace!("Focussing page {}", page_key);
         self.post::<FocusPage>(FocusPageRequest { page_key })
             .await?;
+
+        Ok(())
+    }
+
+    /// Adds files to a page
+    pub async fn add_files_to_page<S: ToString>(
+        &self,
+        page_key: S,
+        file_ids: Vec<u64>,
+        hashes: Vec<String>,
+    ) -> Result<()> {
+        let page_key = page_key.to_string();
+        log::trace!(
+            "Adding files with ids {:?} or hashes {:?} to page {}",
+            file_ids,
+            hashes,
+            page_key
+        );
+        self.post::<AddFiles>(AddFilesRequest {
+            page_key,
+            file_ids,
+            hashes,
+        })
+        .await?;
 
         Ok(())
     }
