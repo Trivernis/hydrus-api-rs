@@ -17,7 +17,8 @@ use crate::api_core::managing_cookies_and_http_headers::{
     SetUserAgentRequest,
 };
 use crate::api_core::managing_pages::{
-    FocusPage, FocusPageRequest, GetPageInfo, GetPageInfoResponse, GetPages, GetPagesResponse,
+    AddFiles, AddFilesRequest, FocusPage, FocusPageRequest, GetPageInfo, GetPageInfoResponse,
+    GetPages, GetPagesResponse,
 };
 use crate::api_core::searching_and_fetching_files::{
     FileMetadata, FileMetadataResponse, GetFile, SearchFiles, SearchFilesResponse,
@@ -357,6 +358,30 @@ impl Client {
         log::trace!("Focussing page {}", page_key);
         self.post::<FocusPage>(FocusPageRequest { page_key })
             .await?;
+
+        Ok(())
+    }
+
+    /// Adds files to a page
+    pub async fn add_files_to_page<S: ToString>(
+        &self,
+        page_key: S,
+        file_ids: Vec<u64>,
+        hashes: Vec<String>,
+    ) -> Result<()> {
+        let page_key = page_key.to_string();
+        log::trace!(
+            "Adding files with ids {:?} or hashes {:?} to page {}",
+            file_ids,
+            hashes,
+            page_key
+        );
+        self.post::<AddFiles>(AddFilesRequest {
+            page_key,
+            file_ids,
+            hashes,
+        })
+        .await?;
 
         Ok(())
     }
