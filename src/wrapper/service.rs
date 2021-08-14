@@ -4,7 +4,9 @@ use crate::api_core::access_management::{
     SERVICE_TYPE_FILE_REPOSITORIES, SERVICE_TYPE_LOCAL_FILES, SERVICE_TYPE_LOCAL_TAGS,
     SERVICE_TYPE_TAG_REPOSITORIES, SERVICE_TYPE_TRASH,
 };
+
 use crate::error::Error;
+use crate::wrapper::builders::search_builder::SearchBuilder;
 use crate::Client;
 use std::collections::HashMap;
 use std::convert::TryFrom;
@@ -102,6 +104,22 @@ pub struct Service {
     pub service_type: ServiceType,
 }
 
+impl Service {
+    pub fn search(&self) -> SearchBuilder {
+        let builder = SearchBuilder::new(self.client.clone());
+        match self.service_type {
+            ServiceType::LocalTags | ServiceType::TagRepositories | ServiceType::AllKnownTags => {
+                builder.tag_service_key(&self.key)
+            }
+            ServiceType::LocalFiles
+            | ServiceType::FileRepositories
+            | ServiceType::AllLocalFiles
+            | ServiceType::AllKnownFiles
+            | ServiceType::Trash => builder.file_service_key(&self.key),
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct Services {
     inner: HashMap<ServiceType, Vec<Service>>,
@@ -140,13 +158,9 @@ impl Services {
     /// Returns a list of all services of the given type
     pub fn get_services(&self, service_type: ServiceType) -> Vec<&Service> {
         if let Some(services) = self.inner.get(&service_type) {
-            let mut borrowed_services = Vec::with_capacity(services.len());
-            for service in services {
-                borrowed_services.push(service)
-            }
-            borrowed_services
+            services.into_iter().collect()
         } else {
-            Vec::with_capacity(0)
+            Vec::new()
         }
     }
 }

@@ -1,11 +1,12 @@
+use crate::api_core::common::FileIdentifier;
 use crate::wrapper::tag::Tag;
 use chrono::{Datelike, Duration};
 
-pub fn string_list_to_json_array(l: Vec<String>) -> String {
+pub(crate) fn string_list_to_json_array(l: Vec<String>) -> String {
     format!("[\"{}\"]", l.join("\",\""))
 }
 
-pub fn number_list_to_json_array<T: ToString>(l: Vec<T>) -> String {
+pub(crate) fn number_list_to_json_array<T: ToString>(l: Vec<T>) -> String {
     format!(
         "[{}]",
         l.into_iter()
@@ -23,7 +24,7 @@ pub fn tag_list_to_string_list(tags: Vec<Tag>) -> Vec<String> {
     tags.into_iter().map(|t| t.to_string()).collect()
 }
 
-pub fn format_datetime<D: Datelike>(datetime: D) -> String {
+pub(crate) fn format_datetime<D: Datelike>(datetime: D) -> String {
     format!(
         "{:04}-{:02}-{:02}",
         datetime.year(),
@@ -32,7 +33,7 @@ pub fn format_datetime<D: Datelike>(datetime: D) -> String {
     )
 }
 
-pub fn format_duration(duration: Duration) -> String {
+pub(crate) fn format_duration(duration: Duration) -> String {
     let mut expression = String::new();
     let days = duration.num_days();
     let hours = duration.num_hours() % 24;
@@ -55,4 +56,19 @@ pub fn format_duration(duration: Duration) -> String {
     expression.push_str(" seconds");
 
     expression
+}
+
+pub(crate) fn split_file_identifiers_into_hashes_and_ids(
+    files: Vec<FileIdentifier>,
+) -> (Vec<u64>, Vec<String>) {
+    let mut ids = Vec::new();
+    let mut hashes = Vec::new();
+
+    for file in files {
+        match file {
+            FileIdentifier::ID(id) => ids.push(id),
+            FileIdentifier::Hash(hash) => hashes.push(hash),
+        }
+    }
+    (ids, hashes)
 }

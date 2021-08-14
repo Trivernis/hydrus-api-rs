@@ -23,6 +23,7 @@ use hydrus_api::wrapper::tag::Tag;
 use hydrus_api::wrapper::service::ServiceName;
 use hydrus_api::wrapper::hydrus_file::FileStatus;
 use hydrus_api::wrapper::page::PageIdentifier;
+use hydrus_api::wrapper::builders::search_builder::SortType;
 use hydrus_api::wrapper::builders::tag_builder::{
     SystemTagBuilder, Comparator
 };
@@ -33,11 +34,12 @@ async fn main() {
     let access_key = env::var("HYDRUS_ACCESS_KEY").unwrap();
     
     let hydrus = Hydrus::new(Client::new(hydrus_url, access_key));
-    let files = hydrus.search(vec![
-        Tag::from("character:megumin"),
-        SystemTagBuilder::new().archive().build(),
-        SystemTagBuilder::new().number_of_tags(Comparator::Greater, 12).build(),
-    ]).await.unwrap();
+    let files = hydrus.search()
+        .add_tag(Tag::from("character:megumin"))
+        .add_tag(SystemTagBuilder::new().archive().build())
+        .add_tag(SystemTagBuilder::new().number_of_tags(Comparator::Greater, 12).build())
+        .sort(SortType::ModifiedTime)
+        .run().await.unwrap();
 
     for mut file in files {
         file.add_tags(ServiceName::my_tags(), vec![Tag::from("ark mage")]).await.unwrap();

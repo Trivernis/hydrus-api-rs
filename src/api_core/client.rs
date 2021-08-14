@@ -21,7 +21,8 @@ use crate::api_core::managing_pages::{
     GetPages, GetPagesResponse,
 };
 use crate::api_core::searching_and_fetching_files::{
-    FileMetadata, FileMetadataResponse, GetFile, SearchFiles, SearchFilesResponse,
+    FileMetadata, FileMetadataResponse, FileSearchOptions, GetFile, SearchFiles,
+    SearchFilesResponse,
 };
 use crate::api_core::Endpoint;
 use crate::error::{Error, Result};
@@ -222,13 +223,16 @@ impl Client {
     }
 
     /// Searches for files in the inbox, the archive or both
-    pub async fn search_files(&self, tags: Vec<String>) -> Result<SearchFilesResponse> {
+    pub async fn search_files(
+        &self,
+        tags: Vec<String>,
+        options: FileSearchOptions,
+    ) -> Result<SearchFilesResponse> {
         log::trace!("Searching for files with tags {:?}", tags);
-        self.get_and_parse::<SearchFiles, [(&str, String)]>(&[(
-            "tags",
-            string_list_to_json_array(tags),
-        )])
-        .await
+        let mut args = options.into_query_args();
+        args.push(("tags", string_list_to_json_array(tags)));
+        self.get_and_parse::<SearchFiles, [(&str, String)]>(&args)
+            .await
     }
 
     /// Returns the metadata for a given list of file_ids or hashes

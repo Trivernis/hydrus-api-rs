@@ -1,13 +1,12 @@
 use crate::api_core::common::FileIdentifier;
 use crate::error::Result;
-use crate::utils::tag_list_to_string_list;
 use crate::wrapper::address::Address;
 use crate::wrapper::builders::import_builder::ImportBuilder;
+use crate::wrapper::builders::search_builder::SearchBuilder;
 use crate::wrapper::builders::tagging_builder::TaggingBuilder;
 use crate::wrapper::hydrus_file::HydrusFile;
 use crate::wrapper::page::HydrusPage;
 use crate::wrapper::service::Services;
-use crate::wrapper::tag::Tag;
 use crate::wrapper::url::Url;
 use crate::wrapper::version::Version;
 use crate::Client;
@@ -82,19 +81,9 @@ impl Hydrus {
         TaggingBuilder::new(self.client.clone())
     }
 
-    /// Searches for files that have the given tags and returns a list of hydrus files as a result
-    pub async fn search(&self, tags: Vec<Tag>) -> Result<Vec<HydrusFile>> {
-        let search_result = self
-            .client
-            .search_files(tag_list_to_string_list(tags))
-            .await?;
-        let files = search_result
-            .file_ids
-            .into_iter()
-            .map(|id| HydrusFile::from_id(self.client.clone(), id))
-            .collect();
-
-        Ok(files)
+    /// Starts a request to search for files
+    pub fn search(&self) -> SearchBuilder {
+        SearchBuilder::new(self.client.clone())
     }
 
     /// Returns a hydrus page by page key

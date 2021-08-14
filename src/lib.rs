@@ -13,17 +13,20 @@
 //! use hydrus_api::wrapper::hydrus_file::FileStatus;
 //! use hydrus_api::wrapper::page::PageIdentifier;
 //! use hydrus_api::wrapper::builders::tag_builder::{SystemTagBuilder, Comparator};
+//! use hydrus_api::wrapper::builders::search_builder::SortType;
 //!
 //! # #[tokio::test]
 //! # async fn doctest() {
 //! let hydrus_url = env::var("HYDRUS_URL").unwrap();
 //! let access_key = env::var("HYDRUS_ACCESS_KEY").unwrap();
 //! let hydrus = Hydrus::new(Client::new(hydrus_url, access_key));
-//! let files = hydrus.search(vec![
-//!     Tag::from("character:megumin"),
-//!     SystemTagBuilder::new().archive().build(),
-//!     SystemTagBuilder::new().tag_namespace_as_number("page", Comparator::Equal, 5).negate().build(),
-//! ]).await.unwrap();
+//! let files = hydrus.search()
+//!     .add_tag(Tag::from("character:megumin"))
+//!     .add_tag(SystemTagBuilder::new().archive().build())
+//!     .add_tag(SystemTagBuilder::new().tag_namespace_as_number("page", Comparator::Equal, 5).negate().build())
+//!     .sort_by(SortType::NumberOfPixels)
+//!     .sort_descending()
+//!     .run().await.unwrap();
 //!
 //! for mut file in files {
 //!     file.add_tags(ServiceName::my_tags(), vec![Tag::from("ark mage")]).await.unwrap();
@@ -74,5 +77,5 @@ pub use wrapper::hydrus::Hydrus;
 
 pub mod api_core;
 pub mod error;
-pub(crate) mod utils;
+pub mod utils;
 pub mod wrapper;

@@ -18,6 +18,16 @@ pub enum FileStatus {
 
 impl Eq for FileStatus {}
 
+impl From<u8> for FileStatus {
+    fn from(v: u8) -> FileStatus {
+        match v {
+            3 => FileStatus::Deleted,
+            0 => FileStatus::ReadyForImport,
+            _ => FileStatus::InDatabase,
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct HydrusFile {
     pub(crate) client: Client,
@@ -41,17 +51,10 @@ impl HydrusFile {
         status: u8,
         hash: S,
     ) -> Self {
-        let status = if status == 3 {
-            FileStatus::Deleted
-        } else if status == 0 {
-            FileStatus::ReadyForImport
-        } else {
-            FileStatus::InDatabase
-        };
         Self {
             client,
             id: FileIdentifier::Hash(hash.to_string()),
-            status,
+            status: status.into(),
             metadata: None,
         }
     }
