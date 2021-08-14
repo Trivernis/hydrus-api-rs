@@ -1,5 +1,6 @@
 use super::super::common;
 use hydrus_api::api_core::adding_tags::TagAction;
+use hydrus_api::wrapper::builders::search_builder::SortType;
 use hydrus_api::wrapper::service::{ServiceName, ServiceType};
 use hydrus_api::wrapper::url::UrlType;
 
@@ -36,7 +37,10 @@ async fn it_retrieves_url_information() {
 async fn it_searches() {
     let hydrus = common::get_hydrus();
     hydrus
-        .search(vec!["character:megumin".into()])
+        .search()
+        .add_tag("character:megumin".into())
+        .sort_by(SortType::ModifiedTime)
+        .run()
         .await
         .unwrap();
 }
