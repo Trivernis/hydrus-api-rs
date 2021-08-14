@@ -10,7 +10,7 @@ use hydrus_api::wrapper::tag::Tag;
 
 async fn retrieve_single_tag(tag: Tag) -> Result<()> {
     let hydrus = common::get_hydrus();
-    hydrus.search(vec![tag]).await?;
+    hydrus.search().add_tag(tag).run().await?;
 
     Ok(())
 }

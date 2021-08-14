@@ -6,6 +6,7 @@ use crate::api_core::access_management::{
 };
 
 use crate::error::Error;
+use crate::wrapper::builders::search_builder::SearchBuilder;
 use crate::Client;
 use std::collections::HashMap;
 use std::convert::TryFrom;
@@ -101,6 +102,22 @@ pub struct Service {
     pub name: ServiceName,
     pub key: String,
     pub service_type: ServiceType,
+}
+
+impl Service {
+    pub fn search(&self) -> SearchBuilder {
+        let builder = SearchBuilder::new(self.client.clone());
+        match self.service_type {
+            ServiceType::LocalTags | ServiceType::TagRepositories | ServiceType::AllKnownTags => {
+                builder.tag_service_key(&self.key)
+            }
+            ServiceType::LocalFiles
+            | ServiceType::FileRepositories
+            | ServiceType::AllLocalFiles
+            | ServiceType::AllKnownFiles
+            | ServiceType::Trash => builder.file_service_key(&self.key),
+        }
+    }
 }
 
 #[derive(Clone)]
