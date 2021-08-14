@@ -1,11 +1,17 @@
 use super::super::common;
 use hydrus_api::api_core::common::FileIdentifier;
+use hydrus_api::api_core::file_sort_type::SORT_FILE_PIXEL_COUNT;
+use hydrus_api::api_core::searching_and_fetching_files::FileSearchOptions;
 
 #[tokio::test]
 async fn is_searches_files() {
     let client = common::get_client();
+    let options = FileSearchOptions::new()
+        .sort_type(SORT_FILE_PIXEL_COUNT)
+        .tag_service_name("public tag repository")
+        .file_service_name("all known files");
     client
-        .search_files(vec!["beach".to_string()])
+        .search_files(vec!["beach".to_string()], options)
         .await
         .unwrap();
 }

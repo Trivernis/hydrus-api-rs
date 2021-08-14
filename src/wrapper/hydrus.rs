@@ -1,4 +1,5 @@
 use crate::api_core::common::FileIdentifier;
+use crate::api_core::searching_and_fetching_files::FileSearchOptions;
 use crate::error::Result;
 use crate::utils::tag_list_to_string_list;
 use crate::wrapper::address::Address;
@@ -86,7 +87,7 @@ impl Hydrus {
     pub async fn search(&self, tags: Vec<Tag>) -> Result<Vec<HydrusFile>> {
         let search_result = self
             .client
-            .search_files(tag_list_to_string_list(tags))
+            .search_files(tag_list_to_string_list(tags), FileSearchOptions::new())
             .await?;
         let files = search_result
             .file_ids
