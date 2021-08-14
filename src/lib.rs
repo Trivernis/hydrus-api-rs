@@ -74,5 +74,5 @@ pub use wrapper::hydrus::Hydrus;
 
 pub mod api_core;
 pub mod error;
-pub(crate) mod utils;
+pub mod utils;
 pub mod wrapper;

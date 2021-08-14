@@ -1,5 +1,6 @@
 use crate::api_core::common::{FileIdentifier, PageInformation};
 use crate::error::Result;
+use crate::utils::split_file_identifiers_into_hashes_and_ids;
 use crate::Client;
 
 #[derive(Clone)]
@@ -40,27 +41,26 @@ impl HydrusPage {
 
     /// Adds files to a page
     pub async fn add_files(&self, files: Vec<FileIdentifier>) -> Result<()> {
-        let mut hashes = Vec::new();
-        let mut ids = Vec::new();
+        let (ids, mut hashes) = split_file_identifiers_into_hashes_and_ids(files);
 
-        for file in files {
-            match file {
-                FileIdentifier::ID(id) => ids.push(id),
-                FileIdentifier::Hash(hash) => hashes.push(hash),
-            }
-        }
         // resolve file ids to hashes
-        if ids.len() > 0 && hashes.len() > 0 {
-            while let Some(id) = ids.pop() {
-                let metadata = self
-                    .client
-                    .get_file_metadata_by_identifier(FileIdentifier::ID(id))
-                    .await?;
-                hashes.push(metadata.hash);
-            }
-        }
+        hashes.append(&mut self.resolve_file_ids_to_hashes(ids).await?);
 
-        self.client.add_files_to_page(&self.key, ids, hashes).await
+        self.client
+            .add_files_to_page(&self.key, [].to_vec(), hashes)
+            .await
+    }
+
+    async fn resolve_file_ids_to_hashes(&self, ids: Vec<u64>) -> Result<Vec<String>> {
+        let mut hashes = Vec::new();
+        for id in ids {
+            let metadata = self
+                .client
+                .get_file_metadata_by_identifier(FileIdentifier::ID(id))
+                .await?;
+            hashes.push(metadata.hash);
+        }
+        Ok(hashes)
     }
 }
 
