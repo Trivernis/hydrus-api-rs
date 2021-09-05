@@ -2,6 +2,7 @@ use super::super::common;
 use hydrus_api::api_core::adding_tags::TagAction;
 use hydrus_api::wrapper::builders::or_chain_builder::OrChainBuilder;
 use hydrus_api::wrapper::builders::search_builder::SortType;
+use hydrus_api::wrapper::builders::tag_builder::TagBuilder;
 use hydrus_api::wrapper::service::{ServiceName, ServiceType};
 use hydrus_api::wrapper::url::UrlType;
 
@@ -44,6 +45,7 @@ async fn it_searches() {
             OrChainBuilder::new()
                 .add_tag("summer".into())
                 .add_tag("winter".into())
+                .add_tag(TagBuilder::new("inside").negate().build())
                 .build(),
         )
         .sort_by(SortType::ModifiedTime)
