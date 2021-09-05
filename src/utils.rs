@@ -1,6 +1,20 @@
 use crate::api_core::common::FileIdentifier;
+use crate::api_core::searching_and_fetching_files::SearchQueryEntry;
 use crate::wrapper::tag::Tag;
 use chrono::{Datelike, Duration};
+
+/// Converts a list of Search Query entries into a json array
+pub(crate) fn search_query_list_to_json_array(l: Vec<SearchQueryEntry>) -> String {
+    let entry_list: Vec<String> = l
+        .into_iter()
+        .map(|e| match e {
+            SearchQueryEntry::Tag(t) => format!("\"{}\"", t),
+            SearchQueryEntry::OrChain(c) => string_list_to_json_array(c),
+        })
+        .collect();
+
+    format!("[{}]", entry_list.join(","))
+}
 
 pub(crate) fn string_list_to_json_array(l: Vec<String>) -> String {
     format!("[\"{}\"]", l.join("\",\""))

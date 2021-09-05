@@ -138,3 +138,18 @@ impl Endpoint for GetFile {
         String::from("get_files/file")
     }
 }
+
+#[derive(Clone, Debug)]
+pub enum SearchQueryEntry {
+    Tag(String),
+    OrChain(Vec<String>),
+}
+
+impl<S> From<S> for SearchQueryEntry
+where
+    S: ToString,
+{
+    fn from(s: S) -> Self {
+        Self::Tag(s.to_string())
+    }
+}

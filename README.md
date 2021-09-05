@@ -24,6 +24,7 @@ use hydrus_api::wrapper::service::ServiceName;
 use hydrus_api::wrapper::hydrus_file::FileStatus;
 use hydrus_api::wrapper::page::PageIdentifier;
 use hydrus_api::wrapper::builders::search_builder::SortType;
+use hydrus_api::wrapper::builders::or_chain_builder::OrChainBuilder;
 use hydrus_api::wrapper::builders::tag_builder::{
     SystemTagBuilder, Comparator
 };
@@ -38,6 +39,12 @@ async fn main() {
         .add_tag(Tag::from("character:megumin"))
         .add_tag(SystemTagBuilder::new().archive().build())
         .add_tag(SystemTagBuilder::new().number_of_tags(Comparator::Greater, 12).build())
+        .add_or_chain(
+            OrChainBuilder::new()
+                .add_tag("summer".into())
+                .add_tag("winter".into())
+                .build(),
+        )
         .sort(SortType::ModifiedTime)
         .run().await.unwrap();
 

@@ -1,7 +1,7 @@
-use crate::api_core::searching_and_fetching_files::FileSearchOptions;
+use crate::api_core::searching_and_fetching_files::{FileSearchOptions, SearchQueryEntry};
 use crate::error::Result;
-use crate::utils::tag_list_to_string_list;
 use crate::wrapper::hydrus_file::HydrusFile;
+use crate::wrapper::or_chain::OrChain;
 use crate::wrapper::service::ServiceName;
 use crate::wrapper::tag::Tag;
 use crate::Client;
@@ -30,6 +30,7 @@ pub enum SortType {
 pub struct SearchBuilder {
     client: Client,
     tags: Vec<Tag>,
+    or_chains: Vec<OrChain>,
     options: FileSearchOptions,
 }
 
@@ -38,6 +39,7 @@ impl SearchBuilder {
         Self {
             client,
             tags: Vec::new(),
+            or_chains: Vec::new(),
             options: FileSearchOptions::new(),
         }
     }
@@ -51,6 +53,12 @@ impl SearchBuilder {
     /// Add a tag to filter by
     pub fn add_tag(mut self, tag: Tag) -> Self {
         self.tags.push(tag);
+        self
+    }
+
+    /// Adds a new or chain
+    pub fn add_or_chain(mut self, chain: OrChain) -> Self {
+        self.or_chains.push(chain);
         self
     }
 
@@ -101,9 +109,19 @@ impl SearchBuilder {
     /// Runs the search
     pub async fn run(self) -> Result<Vec<HydrusFile>> {
         let client = self.client.clone();
-        let response = client
-            .search_files(tag_list_to_string_list(self.tags), self.options)
-            .await?;
+        let mut entries: Vec<SearchQueryEntry> = self
+            .tags
+            .into_iter()
+            .map(|t| SearchQueryEntry::Tag(t.to_string()))
+            .collect();
+        entries.append(
+            &mut self
+                .or_chains
+                .into_iter()
+                .map(|c| SearchQueryEntry::OrChain(c.into_string_list()))
+                .collect(),
+        );
+        let response = client.search_files(entries, self.options).await?;
         let files = response
             .file_ids
             .into_iter()

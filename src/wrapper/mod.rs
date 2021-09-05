@@ -2,6 +2,7 @@ pub mod address;
 pub mod builders;
 pub mod hydrus;
 pub mod hydrus_file;
+pub mod or_chain;
 pub mod page;
 pub mod service;
 pub mod tag;

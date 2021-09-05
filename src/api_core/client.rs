@@ -22,11 +22,13 @@ use crate::api_core::managing_pages::{
 };
 use crate::api_core::searching_and_fetching_files::{
     FileMetadata, FileMetadataResponse, FileSearchOptions, GetFile, SearchFiles,
-    SearchFilesResponse,
+    SearchFilesResponse, SearchQueryEntry,
 };
 use crate::api_core::Endpoint;
 use crate::error::{Error, Result};
-use crate::utils::{number_list_to_json_array, string_list_to_json_array};
+use crate::utils::{
+    number_list_to_json_array, search_query_list_to_json_array, string_list_to_json_array,
+};
 use reqwest::Response;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
@@ -225,12 +227,12 @@ impl Client {
     /// Searches for files in the inbox, the archive or both
     pub async fn search_files(
         &self,
-        tags: Vec<String>,
+        query: Vec<SearchQueryEntry>,
         options: FileSearchOptions,
     ) -> Result<SearchFilesResponse> {
-        log::trace!("Searching for files with tags {:?}", tags);
+        log::trace!("Searching for files with tags {:?}", query);
         let mut args = options.into_query_args();
-        args.push(("tags", string_list_to_json_array(tags)));
+        args.push(("tags", search_query_list_to_json_array(query)));
         self.get_and_parse::<SearchFiles, [(&str, String)]>(&args)
             .await
     }

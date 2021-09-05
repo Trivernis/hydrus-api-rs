@@ -1,17 +1,20 @@
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialOrd, PartialEq)]
 pub struct Tag {
     pub negated: bool,
     pub name: String,
     pub namespace: Option<String>,
 }
 
+impl Eq for Tag {}
+
 impl<S> From<S> for Tag
 where
     S: AsRef<str>,
 {
     fn from(value: S) -> Self {
-        let value = value.as_ref().trim();
-        let negated = value.strip_prefix("-").is_some();
+        let mut value = value.as_ref().trim();
+        let negated = value.starts_with("-");
+        value = value.trim_start_matches("-");
         if let Some((namespace, tag)) = value.split_once(":") {
             Self {
                 negated,
