@@ -1,10 +1,14 @@
 use crate::utils::tag_list_to_string_list;
 use crate::wrapper::tag::Tag;
+use lazy_static::lazy_static;
+use regex::Regex;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialOrd, PartialEq)]
 pub struct OrChain {
     tags: Vec<Tag>,
 }
+
+impl Eq for OrChain {}
 
 impl OrChain {
     /// Creates a new or chain directly from a list of tags
@@ -27,9 +31,12 @@ where
     S: AsRef<str>,
 {
     fn from(s: S) -> Self {
+        lazy_static! {
+            static ref CHAIN_REGEX: Regex = Regex::new(r#"(\s|'|")or(\s|'|")"#).unwrap();
+        }
         let s = s.as_ref().to_ascii_lowercase();
-        let tags = s
-            .split("or")
+        let tags = CHAIN_REGEX
+            .split(&s)
             .map(|mut t| {
                 t = t
                     .trim_start()
@@ -40,6 +47,7 @@ where
             })
             .map(Tag::from)
             .collect();
+        log::debug!("String parsed to or-chain {:?}", tags);
 
         Self { tags }
     }
