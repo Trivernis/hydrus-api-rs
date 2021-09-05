@@ -1,5 +1,6 @@
 use super::super::common;
 use hydrus_api::api_core::adding_tags::TagAction;
+use hydrus_api::wrapper::builders::or_chain_builder::OrChainBuilder;
 use hydrus_api::wrapper::builders::search_builder::SortType;
 use hydrus_api::wrapper::service::{ServiceName, ServiceType};
 use hydrus_api::wrapper::url::UrlType;
@@ -39,6 +40,12 @@ async fn it_searches() {
     hydrus
         .search()
         .add_tag("character:megumin".into())
+        .add_or_chain(
+            OrChainBuilder::new()
+                .add_tag("summer".into())
+                .add_tag("winter".into())
+                .build(),
+        )
         .sort_by(SortType::ModifiedTime)
         .run()
         .await

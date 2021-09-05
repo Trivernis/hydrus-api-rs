@@ -14,6 +14,7 @@
 //! use hydrus_api::wrapper::page::PageIdentifier;
 //! use hydrus_api::wrapper::builders::tag_builder::{SystemTagBuilder, Comparator};
 //! use hydrus_api::wrapper::builders::search_builder::SortType;
+//! use hydrus_api::wrapper::builders::or_chain_builder::OrChainBuilder;
 //!
 //! # #[tokio::test]
 //! # async fn doctest() {
@@ -24,6 +25,12 @@
 //!     .add_tag(Tag::from("character:megumin"))
 //!     .add_tag(SystemTagBuilder::new().archive().build())
 //!     .add_tag(SystemTagBuilder::new().tag_namespace_as_number("page", Comparator::Equal, 5).negate().build())
+//!     .add_or_chain(
+//!         OrChainBuilder::new()
+//!             .add_tag("summer".into())
+//!             .add_tag("winter".into())
+//!             .build(),
+//!     )
 //!     .sort_by(SortType::NumberOfPixels)
 //!     .sort_descending()
 //!     .run().await.unwrap();
