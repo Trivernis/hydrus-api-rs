@@ -22,8 +22,8 @@ use crate::api_core::managing_pages::{
     GetPages, GetPagesResponse,
 };
 use crate::api_core::searching_and_fetching_files::{
-    FileMetadata, FileMetadataResponse, FileSearchOptions, GetFile, SearchFiles,
-    SearchFilesResponse, SearchQueryEntry,
+    FileMetadata, FileMetadataResponse, FileSearchOptions, GetFile, SearchFileHashes,
+    SearchFileHashesResponse, SearchFiles, SearchFilesResponse, SearchQueryEntry,
 };
 use crate::api_core::Endpoint;
 use crate::error::{Error, Result};
@@ -241,7 +241,7 @@ impl Client {
         Ok(())
     }
 
-    /// Searches for files in the inbox, the archive or both
+    /// Searches for files
     #[tracing::instrument(skip(self), level = "debug")]
     pub async fn search_files(
         &self,
@@ -251,6 +251,20 @@ impl Client {
         let mut args = options.into_query_args();
         args.push(("tags", search_query_list_to_json_array(query)));
         self.get_and_parse::<SearchFiles, [(&str, String)]>(&args)
+            .await
+    }
+
+    /// Searches for file hashes
+    #[tracing::instrument(skip(self), level = "debug")]
+    pub async fn search_file_hashes(
+        &self,
+        query: Vec<SearchQueryEntry>,
+        options: FileSearchOptions,
+    ) -> Result<SearchFileHashesResponse> {
+        let mut args = options.into_query_args();
+        args.push(("tags", search_query_list_to_json_array(query)));
+        args.push(("return_hashes", String::from("true")));
+        self.get_and_parse::<SearchFileHashes, [(&str, String)]>(&args)
             .await
     }
 
