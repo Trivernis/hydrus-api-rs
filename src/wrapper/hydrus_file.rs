@@ -5,6 +5,7 @@ use crate::utils::tag_list_to_string_list;
 use crate::wrapper::service::ServiceName;
 use crate::wrapper::tag::Tag;
 use crate::Client;
+use chrono::{NaiveDateTime, TimeZone, Utc};
 use mime::Mime;
 use std::collections::HashMap;
 
@@ -169,6 +170,61 @@ impl HydrusFile {
         let metadata = self.metadata().await?;
 
         Ok(metadata.is_trashed)
+    }
+
+    /// Returns all urls associated with the file
+    pub async fn urls(&mut self) -> Result<&Vec<String>> {
+        let metadata = self.metadata().await?;
+
+        Ok(&metadata.known_urls)
+    }
+
+    /// Returns the modified time of the file
+    pub async fn time_modified(&mut self) -> Result<Option<NaiveDateTime>> {
+        let metadata = self.metadata().await?;
+        let naive_time_modified = metadata
+            .time_modified
+            .map(|m| Utc.timestamp_millis(m as i64).naive_utc());
+
+        Ok(naive_time_modified)
+    }
+
+    /// Returns the imported time of the file for a given file service key
+    pub async fn time_imported<S: AsRef<str>>(
+        &mut self,
+        service_key: S,
+    ) -> Result<Option<NaiveDateTime>> {
+        let metadata = self.metadata().await?;
+        let naive_time_imported = metadata
+            .file_services
+            .current
+            .get(service_key.as_ref())
+            .map(|s| s.time_imported)
+            .or_else(|| {
+                metadata
+                    .file_services
+                    .deleted
+                    .get(service_key.as_ref())
+                    .map(|s| s.time_imported)
+            })
+            .map(|millis| Utc.timestamp_millis(millis as i64).naive_utc());
+
+        Ok(naive_time_imported)
+    }
+
+    pub async fn time_deleted<S: AsRef<str>>(
+        &mut self,
+        service_key: S,
+    ) -> Result<Option<NaiveDateTime>> {
+        let metadata = self.metadata().await?;
+        let naive_time_deleted = metadata
+            .file_services
+            .deleted
+            .get(service_key.as_ref())
+            .map(|service| service.time_deleted)
+            .map(|millis| Utc.timestamp_millis(millis as i64).naive_utc());
+
+        Ok(naive_time_deleted)
     }
 
     /// Associates the file with a list of urls

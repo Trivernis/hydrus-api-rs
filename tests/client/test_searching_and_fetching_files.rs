@@ -44,13 +44,13 @@ async fn is_searches_file_hashes() {
 #[tokio::test]
 async fn it_fetches_file_metadata() {
     let client = common::get_client();
-    let response = client
+    client
         .get_file_metadata(
             vec![],
             vec!["0000000000000000000000000000000000000000000000000000000000000000".to_string()],
         )
-        .await;
-    assert!(response.is_ok()); // Even if the file doesn't exist it still returns some information about it
+        .await
+        .unwrap();
 }
 
 #[tokio::test]

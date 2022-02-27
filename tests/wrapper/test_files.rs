@@ -87,4 +87,7 @@ async fn it_retrieves_metadata() {
     assert!(file.dimensions().await.unwrap().is_some());
     assert!(file.stored_locally().await.unwrap());
     assert!(file.duration().await.unwrap().is_none());
+    assert!(file.time_modified().await.is_ok());
+    assert!(file.time_deleted("000").await.is_ok());
+    assert!(file.time_imported("000").await.is_ok());
 }
