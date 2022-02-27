@@ -49,13 +49,13 @@ async fn main() {
         .run().await.unwrap();
 
     for mut file in files {
-        file.add_tags(ServiceName::my_tags(), vec![Tag::from("ark mage")]).await.unwrap();
+        file.add_tags(ServiceName::my_tags().into(), vec![Tag::from("ark mage")]).await.unwrap();
     }
 
     let url = hydrus.import()
         .url("https://www.pixiv.net/member_illust.php?illust_id=83406361&mode=medium")
         .page(PageIdentifier::name("My Import Page"))
-        .add_additional_tag(ServiceName::my_tags(), Tag::from("character:megumin"))
+        .add_additional_tag(ServiceName::my_tags().into(), Tag::from("character:megumin"))
         .show_page(true)
         .run().await.unwrap();
 }
@@ -67,6 +67,7 @@ async fn main() {
 use hydrus_api::Client;
 use hydrus_api::paths::adding_tags::{AddTagsRequestBuilder, TagAction};
 use std::env;
+use hydrus_api::api_core::common::ServiceIdentifier;
 
 #[tokio::main]
 async fn main() {
@@ -81,9 +82,9 @@ async fn main() {
     let request = AddTagsRequestBuilder::default()
         .add_hash(hash)
         // for each tag the service has to be specified
-        .add_tags("my tags", vec!["beach".into(), "summer".into()])
+        .add_tags(ServiceIdentifier::name("my tags"), vec!["beach".into(), "summer".into()])
         // with tag actions tags can also be removed. It's especially useful for the PTR
-        .add_tag_with_action("my tags", "rain", TagAction::DeleteFromLocalService)
+        .add_tag_with_action(ServiceIdentifier::name("my tags"), "rain", TagAction::DeleteFromLocalService)
         .build();
     
     client.add_tags(request).await.unwrap();

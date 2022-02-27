@@ -5,7 +5,6 @@ use crate::error::{Error, Result};
 use crate::utils::tag_list_to_string_list;
 use crate::wrapper::hydrus_file::HydrusFile;
 use crate::wrapper::page::PageIdentifier;
-use crate::wrapper::service::ServiceName;
 use crate::wrapper::tag::Tag;
 use crate::wrapper::url::Url;
 use crate::Client;
@@ -78,7 +77,7 @@ pub struct UrlImportBuilder {
     page: Option<PageIdentifier>,
     show_page: bool,
     filter_tags: Vec<Tag>,
-    service_tag_mappings: HashMap<String, Vec<Tag>>,
+    service_tag_mappings: HashMap<ServiceIdentifier, Vec<Tag>>,
 }
 
 impl UrlImportBuilder {
@@ -122,16 +121,16 @@ impl UrlImportBuilder {
     }
 
     /// Adds an additional tag for the imported file
-    pub fn add_additional_tag(self, service: ServiceName, tag: Tag) -> Self {
+    pub fn add_additional_tag(self, service: ServiceIdentifier, tag: Tag) -> Self {
         self.add_additional_tags(service, vec![tag])
     }
 
     /// Adds multiple additional tags for the import
-    pub fn add_additional_tags(mut self, service: ServiceName, mut tags: Vec<Tag>) -> Self {
-        if let Some(service_tags) = self.service_tag_mappings.get_mut(&service.0) {
+    pub fn add_additional_tags(mut self, service: ServiceIdentifier, mut tags: Vec<Tag>) -> Self {
+        if let Some(service_tags) = self.service_tag_mappings.get_mut(&service) {
             service_tags.append(&mut tags);
         } else {
-            self.service_tag_mappings.insert(service.0, tags);
+            self.service_tag_mappings.insert(service, tags);
         }
 
         self
@@ -142,10 +141,7 @@ impl UrlImportBuilder {
         let mut request = AddUrlRequestBuilder::default().url(&self.url);
 
         for (service, tags) in self.service_tag_mappings {
-            request = request.add_tags(
-                ServiceIdentifier::name(service),
-                tag_list_to_string_list(tags),
-            );
+            request = request.add_tags(service, tag_list_to_string_list(tags));
         }
         request = request.add_filter_tags(tag_list_to_string_list(self.filter_tags));
         if let Some(page) = self.page {

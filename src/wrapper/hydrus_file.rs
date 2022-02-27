@@ -212,6 +212,7 @@ impl HydrusFile {
         Ok(naive_time_imported)
     }
 
+    /// Returns the time the file was deleted for a specified file service
     pub async fn time_deleted<S: AsRef<str>>(
         &mut self,
         service_key: S,
