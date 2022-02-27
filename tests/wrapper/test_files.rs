@@ -54,7 +54,7 @@ async fn it_has_tags() {
 async fn it_adds_tags() {
     let mut file = get_file().await;
     file.add_tags(
-        ServiceName::public_tag_repository(),
+        ServiceName::my_tags(),
         vec!["character:megumin".into(), "ark mage".into()],
     )
     .await
@@ -65,7 +65,7 @@ async fn it_adds_tags() {
 async fn it_modifies_tags() {
     let mut file = get_file().await;
     file.modify_tags(
-        ServiceName::public_tag_repository(),
+        ServiceName::my_tags(),
         TagAction::RescindPendFromRepository,
         vec!["ark mage".into()],
     )

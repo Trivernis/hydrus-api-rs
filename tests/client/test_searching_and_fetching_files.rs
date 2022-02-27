@@ -8,7 +8,7 @@ async fn is_searches_files() {
     let client = common::get_client();
     let options = FileSearchOptions::new()
         .sort_type(SORT_FILE_PIXEL_COUNT)
-        .tag_service_name("public tag repository")
+        .tag_service_name("my tags")
         .file_service_name("all known files");
     client
         .search_files(
