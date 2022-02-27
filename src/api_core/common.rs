@@ -6,6 +6,14 @@ pub struct BasicServiceInfo {
     pub service_key: String,
 }
 
+impl BasicServiceInfo {
+    /// Converts the Service into into an identifier
+    /// that can be used for requests consuming service references
+    pub fn into_id(self) -> ServiceIdentifier {
+        ServiceIdentifier::Key(self.service_key)
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize, Hash, PartialOrd, PartialEq, Ord, Eq)]
 pub enum ServiceIdentifier {
     Name(String),

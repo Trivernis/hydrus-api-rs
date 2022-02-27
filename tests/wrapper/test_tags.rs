@@ -7,8 +7,12 @@ use hydrus_api::wrapper::builders::tag_builder::{
 };
 use hydrus_api::wrapper::service::ServiceName;
 use hydrus_api::wrapper::tag::Tag;
+use std::sync::Arc;
+use tokio::sync::Mutex;
 
 async fn retrieve_single_tag(tag: Tag) -> Result<()> {
+    lazy_static::lazy_static! { static ref SEM: Arc<Mutex<()>> = Arc::new(Mutex::new(())); }
+    SEM.lock().await;
     let hydrus = common::get_hydrus();
     hydrus.search().add_tag(tag).run().await?;
 

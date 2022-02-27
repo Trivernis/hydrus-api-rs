@@ -1,3 +1,4 @@
+use crate::api_core::common::ServiceIdentifier;
 use crate::api_core::Endpoint;
 use serde::Serialize;
 use std::collections::HashMap;
@@ -52,7 +53,7 @@ impl Endpoint for GetUrlInfo {
     }
 }
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Default, Debug, Serialize)]
 pub struct AddUrlRequest {
     pub url: String,
 
@@ -64,6 +65,7 @@ pub struct AddUrlRequest {
 
     pub show_destination_page: bool,
     pub service_names_to_additional_tags: HashMap<String, Vec<String>>,
+    pub service_keys_to_additional_tags: HashMap<String, Vec<String>>,
     pub filterable_tags: Vec<String>,
 }
 
@@ -73,31 +75,18 @@ pub struct AddUrlRequest {
 /// Example:
 /// ```
 /// use hydrus_api::api_core::adding_urls::AddUrlRequestBuilder;
+/// use hydrus_api::api_core::common::ServiceIdentifier;
 ///
 /// let request = AddUrlRequestBuilder::default()
 ///     .url("https://www.pixiv.net/member_illust.php?illust_id=83406361&mode=medium")
-///     .add_tags("my tags", vec!["ark mage".to_string(), "grinning".to_string()])
+///     .add_tags(ServiceIdentifier::name("my tags"), vec!["ark mage".to_string(), "grinning".to_string()])
 ///     .show_destination_page(true)
 ///     .destination_page_name("Rusty Url Import")
 ///     .build();
 /// ```
+#[derive(Default)]
 pub struct AddUrlRequestBuilder {
     inner: AddUrlRequest,
-}
-
-impl Default for AddUrlRequestBuilder {
-    fn default() -> Self {
-        Self {
-            inner: AddUrlRequest {
-                url: String::new(),
-                destination_page_key: None,
-                destination_page_name: None,
-                show_destination_page: false,
-                service_names_to_additional_tags: Default::default(),
-                filterable_tags: vec![],
-            },
-        }
-    }
 }
 
 impl AddUrlRequestBuilder {
@@ -125,17 +114,17 @@ impl AddUrlRequestBuilder {
         self
     }
 
-    pub fn add_tags<S: AsRef<str>>(mut self, service: S, mut tags: Vec<String>) -> Self {
-        if let Some(entry) = self
-            .inner
-            .service_names_to_additional_tags
-            .get_mut(service.as_ref())
-        {
+    pub fn add_tags(mut self, service_id: ServiceIdentifier, mut tags: Vec<String>) -> Self {
+        let (service, mappings) = match service_id {
+            ServiceIdentifier::Name(name) => {
+                (name, &mut self.inner.service_names_to_additional_tags)
+            }
+            ServiceIdentifier::Key(key) => (key, &mut self.inner.service_keys_to_additional_tags),
+        };
+        if let Some(entry) = mappings.get_mut(&service) {
             entry.append(&mut tags);
         } else {
-            self.inner
-                .service_names_to_additional_tags
-                .insert(service.as_ref().to_string(), tags);
+            mappings.insert(service, tags);
         }
 
         self

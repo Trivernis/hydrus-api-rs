@@ -1,5 +1,5 @@
 use crate::api_core::adding_tags::{AddTagsRequestBuilder, TagAction};
-use crate::api_core::common::{FileIdentifier, FileMetadataInfo, FileRecord};
+use crate::api_core::common::{FileIdentifier, FileMetadataInfo, FileRecord, ServiceIdentifier};
 use crate::error::{Error, Result};
 use crate::utils::tag_list_to_string_list;
 use crate::wrapper::service::ServiceName;
@@ -213,11 +213,11 @@ impl HydrusFile {
     }
 
     /// Adds tags for a specific service to the file
-    pub async fn add_tags(&mut self, service: ServiceName, tags: Vec<Tag>) -> Result<()> {
+    pub async fn add_tags(&mut self, service: ServiceIdentifier, tags: Vec<Tag>) -> Result<()> {
         let hash = self.hash().await?;
         let request = AddTagsRequestBuilder::default()
             .add_hash(hash)
-            .add_tags(service.into(), tag_list_to_string_list(tags))
+            .add_tags(service, tag_list_to_string_list(tags))
             .build();
 
         self.client.add_tags(request).await
@@ -226,7 +226,7 @@ impl HydrusFile {
     /// Allows modification of tags by using the defined tag actions
     pub async fn modify_tags(
         &mut self,
-        service: ServiceName,
+        service: ServiceIdentifier,
         action: TagAction,
         tags: Vec<Tag>,
     ) -> Result<()> {
@@ -234,11 +234,7 @@ impl HydrusFile {
         let mut reqwest = AddTagsRequestBuilder::default().add_hash(hash);
 
         for tag in tags {
-            reqwest = reqwest.add_tag_with_action(
-                service.clone().into(),
-                tag.to_string(),
-                action.clone(),
-            );
+            reqwest = reqwest.add_tag_with_action(service.clone(), tag.to_string(), action.clone());
         }
 
         self.client.add_tags(reqwest.build()).await

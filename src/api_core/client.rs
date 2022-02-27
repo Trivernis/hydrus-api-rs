@@ -11,6 +11,7 @@ use crate::api_core::adding_urls::{
     AddUrl, AddUrlRequest, AddUrlResponse, AssociateUrl, AssociateUrlRequest, GetUrlFiles,
     GetUrlFilesResponse, GetUrlInfo, GetUrlInfoResponse,
 };
+use crate::api_core::client_builder::ClientBuilder;
 use crate::api_core::common::{FileIdentifier, FileMetadataInfo, FileRecord, OptionalStringNumber};
 use crate::api_core::managing_cookies_and_http_headers::{
     GetCookies, GetCookiesResponse, SetCookies, SetCookiesRequest, SetUserAgent,
@@ -41,12 +42,17 @@ static ACCESS_KEY_HEADER: &str = "Hydrus-Client-API-Access-Key";
 /// over the REST api.
 #[derive(Debug)]
 pub struct Client {
-    inner: reqwest::Client,
-    base_url: String,
-    access_key: String,
+    pub(crate) inner: reqwest::Client,
+    pub(crate) base_url: String,
+    pub(crate) access_key: String,
 }
 
 impl Client {
+    /// Returns a builder for the client
+    pub fn builder() -> ClientBuilder {
+        ClientBuilder::default()
+    }
+
     /// Creates a new client to start requests against the hydrus api.
     pub fn new<S: AsRef<str>>(url: S, access_key: S) -> Self {
         Self {

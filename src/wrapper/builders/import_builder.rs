@@ -1,5 +1,6 @@
 use crate::api_core::adding_files::{STATUS_IMPORT_FAILED, STATUS_IMPORT_VETOED};
 use crate::api_core::adding_urls::AddUrlRequestBuilder;
+use crate::api_core::common::ServiceIdentifier;
 use crate::error::{Error, Result};
 use crate::utils::tag_list_to_string_list;
 use crate::wrapper::hydrus_file::HydrusFile;
@@ -141,7 +142,10 @@ impl UrlImportBuilder {
         let mut request = AddUrlRequestBuilder::default().url(&self.url);
 
         for (service, tags) in self.service_tag_mappings {
-            request = request.add_tags(service, tag_list_to_string_list(tags));
+            request = request.add_tags(
+                ServiceIdentifier::name(service),
+                tag_list_to_string_list(tags),
+            );
         }
         request = request.add_filter_tags(tag_list_to_string_list(self.filter_tags));
         if let Some(page) = self.page {

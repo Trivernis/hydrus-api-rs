@@ -2,6 +2,7 @@ use hydrus_api::api_core::client::Client;
 use hydrus_api::Hydrus;
 use std::env;
 use std::sync::{Arc, Mutex, MutexGuard};
+use std::time::Duration;
 
 pub fn setup() {
     lazy_static::lazy_static! { static ref SETUP_DONE: Arc<Mutex<bool>> = Arc::new(Mutex::new(false)); }
@@ -16,11 +17,12 @@ pub fn setup() {
 
 pub fn get_client() -> Client {
     setup();
-
-    Client::new(
-        env::var("HYDRUS_URL").unwrap(),
-        env::var("HYDRUS_ACCESS_KEY").unwrap(),
-    )
+    Client::builder()
+        .url(env::var("HYDRUS_URL").unwrap())
+        .access_key(env::var("HYDRUS_ACCESS_KEY").unwrap())
+        .timeout(Duration::from_secs(5))
+        .build()
+        .unwrap()
 }
 
 pub fn get_hydrus() -> Hydrus {
