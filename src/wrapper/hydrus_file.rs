@@ -217,7 +217,7 @@ impl HydrusFile {
         let hash = self.hash().await?;
         let request = AddTagsRequestBuilder::default()
             .add_hash(hash)
-            .add_tags(service.0, tag_list_to_string_list(tags))
+            .add_tags(service.into(), tag_list_to_string_list(tags))
             .build();
 
         self.client.add_tags(request).await
@@ -234,8 +234,11 @@ impl HydrusFile {
         let mut reqwest = AddTagsRequestBuilder::default().add_hash(hash);
 
         for tag in tags {
-            reqwest =
-                reqwest.add_tag_with_action(service.0.clone(), tag.to_string(), action.clone());
+            reqwest = reqwest.add_tag_with_action(
+                service.clone().into(),
+                tag.to_string(),
+                action.clone(),
+            );
         }
 
         self.client.add_tags(reqwest.build()).await

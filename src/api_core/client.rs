@@ -228,6 +228,7 @@ impl Client {
     }
 
     /// Adds tags to files with the given hashes
+    #[tracing::instrument(skip(self), level = "debug")]
     pub async fn add_tags(&self, request: AddTagsRequest) -> Result<()> {
         self.post::<AddTags>(request).await?;
 

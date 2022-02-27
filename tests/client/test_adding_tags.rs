@@ -1,5 +1,6 @@
 use super::super::common;
 use hydrus_api::api_core::adding_tags::{AddTagsRequestBuilder, TagAction};
+use hydrus_api::api_core::common::ServiceIdentifier;
 
 #[tokio::test]
 async fn it_cleans_tags() {
@@ -21,8 +22,15 @@ async fn it_adds_tags() {
     let client = common::get_client();
     let request = AddTagsRequestBuilder::default()
         .add_hash("0000000000000000000000000000000000000000000000000000000000000000") // valid hash, I hope no files are affected
-        .add_tags("my tags", vec!["beach".into(), "summer".into()])
-        .add_tag_with_action("my tags", "rain", TagAction::DeleteFromLocalService)
+        .add_tags(
+            ServiceIdentifier::name("my tags"),
+            vec!["beach".into(), "summer".into()],
+        )
+        .add_tag_with_action(
+            ServiceIdentifier::name("my tags"),
+            "rain",
+            TagAction::DeleteFromLocalService,
+        )
         .build();
     client.add_tags(request).await.unwrap();
 }

@@ -5,6 +5,7 @@ use crate::api_core::access_management::{
     SERVICE_TYPE_TAG_REPOSITORIES, SERVICE_TYPE_TRASH,
 };
 
+use crate::api_core::common::ServiceIdentifier;
 use crate::error::Error;
 use crate::wrapper::builders::search_builder::SearchBuilder;
 use crate::Client;
@@ -93,6 +94,12 @@ impl ServiceName {
 impl Display for ServiceName {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         self.0.fmt(f)
+    }
+}
+
+impl Into<ServiceIdentifier> for ServiceName {
+    fn into(self) -> ServiceIdentifier {
+        ServiceIdentifier::Name(self.0)
     }
 }
 

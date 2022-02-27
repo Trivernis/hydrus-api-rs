@@ -6,6 +6,22 @@ pub struct BasicServiceInfo {
     pub service_key: String,
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize, Hash, PartialOrd, PartialEq, Ord, Eq)]
+pub enum ServiceIdentifier {
+    Name(String),
+    Key(String),
+}
+
+impl ServiceIdentifier {
+    pub fn name<S: ToString>(name: S) -> Self {
+        Self::Name(name.to_string())
+    }
+
+    pub fn key<S: ToString>(key: S) -> Self {
+        Self::Key(key.to_string())
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BasicHashList {
     pub hashes: Vec<String>,
