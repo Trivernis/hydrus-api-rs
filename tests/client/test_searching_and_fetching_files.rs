@@ -8,7 +8,7 @@ async fn is_searches_files() {
     let client = common::get_client();
     let options = FileSearchOptions::new()
         .sort_type(SORT_FILE_PIXEL_COUNT)
-        .tag_service_name("public tag repository")
+        .tag_service_name("my tags")
         .file_service_name("all known files");
     client
         .search_files(
@@ -23,15 +23,34 @@ async fn is_searches_files() {
 }
 
 #[tokio::test]
+async fn is_searches_file_hashes() {
+    let client = common::get_client();
+    let options = FileSearchOptions::new()
+        .sort_type(SORT_FILE_PIXEL_COUNT)
+        .tag_service_name("my tags")
+        .file_service_name("all known files");
+    client
+        .search_file_hashes(
+            vec![
+                "beach".into(),
+                SearchQueryEntry::OrChain(vec!["summer".to_string(), "winter".to_string()]),
+            ],
+            options,
+        )
+        .await
+        .unwrap();
+}
+
+#[tokio::test]
 async fn it_fetches_file_metadata() {
     let client = common::get_client();
-    let response = client
+    client
         .get_file_metadata(
             vec![],
             vec!["0000000000000000000000000000000000000000000000000000000000000000".to_string()],
         )
-        .await;
-    assert!(response.is_ok()); // Even if the file doesn't exist it still returns some information about it
+        .await
+        .unwrap();
 }
 
 #[tokio::test]

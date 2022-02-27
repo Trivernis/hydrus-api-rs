@@ -39,8 +39,11 @@ async fn it_imports_urls() {
         .url("https://www.pixiv.net/member_illust.php?illust_id=83406361&mode=medium")
         .page(PageIdentifier::name("Rusty Import"))
         .show_page(true)
-        .add_additional_tag(ServiceName::my_tags(), Tag::from("ark mage"))
-        .add_additional_tag(ServiceName::my_tags(), Tag::from("character:megumin"))
+        .add_additional_tag(ServiceName::my_tags().into(), Tag::from("ark mage"))
+        .add_additional_tag(
+            ServiceName::my_tags().into(),
+            Tag::from("character:megumin"),
+        )
         .run()
         .await
         .unwrap();

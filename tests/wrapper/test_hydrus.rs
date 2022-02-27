@@ -60,7 +60,7 @@ async fn it_adds_tags() {
     hydrus
         .tagging()
         .add_tag(
-            ServiceName::my_tags(),
+            ServiceName::my_tags().into(),
             TagAction::AddToLocalService,
             "summer".into(),
         )

@@ -1,10 +1,11 @@
 use crate::api_core::adding_tags::{AddTagsRequestBuilder, TagAction};
-use crate::api_core::common::{FileIdentifier, FileMetadataInfo, FileRecord};
+use crate::api_core::common::{FileIdentifier, FileMetadataInfo, FileRecord, ServiceIdentifier};
 use crate::error::{Error, Result};
 use crate::utils::tag_list_to_string_list;
 use crate::wrapper::service::ServiceName;
 use crate::wrapper::tag::Tag;
 use crate::Client;
+use chrono::{NaiveDateTime, TimeZone, Utc};
 use mime::Mime;
 use std::collections::HashMap;
 
@@ -171,6 +172,62 @@ impl HydrusFile {
         Ok(metadata.is_trashed)
     }
 
+    /// Returns all urls associated with the file
+    pub async fn urls(&mut self) -> Result<&Vec<String>> {
+        let metadata = self.metadata().await?;
+
+        Ok(&metadata.known_urls)
+    }
+
+    /// Returns the modified time of the file
+    pub async fn time_modified(&mut self) -> Result<Option<NaiveDateTime>> {
+        let metadata = self.metadata().await?;
+        let naive_time_modified = metadata
+            .time_modified
+            .map(|m| Utc.timestamp_millis(m as i64).naive_utc());
+
+        Ok(naive_time_modified)
+    }
+
+    /// Returns the imported time of the file for a given file service key
+    pub async fn time_imported<S: AsRef<str>>(
+        &mut self,
+        service_key: S,
+    ) -> Result<Option<NaiveDateTime>> {
+        let metadata = self.metadata().await?;
+        let naive_time_imported = metadata
+            .file_services
+            .current
+            .get(service_key.as_ref())
+            .map(|s| s.time_imported)
+            .or_else(|| {
+                metadata
+                    .file_services
+                    .deleted
+                    .get(service_key.as_ref())
+                    .map(|s| s.time_imported)
+            })
+            .map(|millis| Utc.timestamp_millis(millis as i64).naive_utc());
+
+        Ok(naive_time_imported)
+    }
+
+    /// Returns the time the file was deleted for a specified file service
+    pub async fn time_deleted<S: AsRef<str>>(
+        &mut self,
+        service_key: S,
+    ) -> Result<Option<NaiveDateTime>> {
+        let metadata = self.metadata().await?;
+        let naive_time_deleted = metadata
+            .file_services
+            .deleted
+            .get(service_key.as_ref())
+            .map(|service| service.time_deleted)
+            .map(|millis| Utc.timestamp_millis(millis as i64).naive_utc());
+
+        Ok(naive_time_deleted)
+    }
+
     /// Associates the file with a list of urls
     pub async fn associate_urls(&mut self, urls: Vec<String>) -> Result<()> {
         let hash = self.hash().await?;
@@ -183,11 +240,15 @@ impl HydrusFile {
         self.client.disassociate_urls(urls, vec![hash]).await
     }
 
-    /// Returns map mapping lists of tags to services
-    pub async fn services_with_tags(&mut self) -> Result<HashMap<ServiceName, Vec<Tag>>> {
+    /// Returns map mapping lists of tags to services.
+    ///
+    /// Deprecation: Use [HydrusFile::services_with_tags] instead.
+    #[deprecated(note = "Deprecated in the official API. Use services_with_tags instead.")]
+    pub async fn service_names_with_tags(&mut self) -> Result<HashMap<ServiceName, Vec<Tag>>> {
         let metadata = self.metadata().await?;
         let mut tag_mappings = HashMap::new();
 
+        #[allow(deprecated)]
         for (service, status_tags) in &metadata.service_names_to_statuses_to_tags {
             let mut tag_list = Vec::new();
 
@@ -195,6 +256,23 @@ impl HydrusFile {
                 tag_list.append(&mut tags.into_iter().map(|t| t.into()).collect())
             }
             tag_mappings.insert(ServiceName(service.clone()), tag_list);
+        }
+
+        Ok(tag_mappings)
+    }
+
+    /// Returns a mapping with service ids mapped to tags
+    pub async fn services_with_tags(&mut self) -> Result<HashMap<ServiceIdentifier, Vec<Tag>>> {
+        let metadata = self.metadata().await?;
+        let mut tag_mappings = HashMap::new();
+
+        for (service, status_tags) in &metadata.service_keys_to_statuses_to_tags {
+            let mut tag_list = Vec::new();
+
+            for (_, tags) in status_tags {
+                tag_list.append(&mut tags.into_iter().map(|t| t.into()).collect())
+            }
+            tag_mappings.insert(ServiceIdentifier::Key(service.clone()), tag_list);
         }
 
         Ok(tag_mappings)
@@ -213,11 +291,11 @@ impl HydrusFile {
     }
 
     /// Adds tags for a specific service to the file
-    pub async fn add_tags(&mut self, service: ServiceName, tags: Vec<Tag>) -> Result<()> {
+    pub async fn add_tags(&mut self, service: ServiceIdentifier, tags: Vec<Tag>) -> Result<()> {
         let hash = self.hash().await?;
         let request = AddTagsRequestBuilder::default()
             .add_hash(hash)
-            .add_tags(service.0, tag_list_to_string_list(tags))
+            .add_tags(service, tag_list_to_string_list(tags))
             .build();
 
         self.client.add_tags(request).await
@@ -226,7 +304,7 @@ impl HydrusFile {
     /// Allows modification of tags by using the defined tag actions
     pub async fn modify_tags(
         &mut self,
-        service: ServiceName,
+        service: ServiceIdentifier,
         action: TagAction,
         tags: Vec<Tag>,
     ) -> Result<()> {
@@ -234,8 +312,7 @@ impl HydrusFile {
         let mut reqwest = AddTagsRequestBuilder::default().add_hash(hash);
 
         for tag in tags {
-            reqwest =
-                reqwest.add_tag_with_action(service.0.clone(), tag.to_string(), action.clone());
+            reqwest = reqwest.add_tag_with_action(service.clone(), tag.to_string(), action.clone());
         }
 
         self.client.add_tags(reqwest.build()).await

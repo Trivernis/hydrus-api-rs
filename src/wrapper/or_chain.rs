@@ -47,7 +47,7 @@ where
             })
             .map(Tag::from)
             .collect();
-        log::debug!("String parsed to or-chain {:?}", tags);
+        tracing::debug!("String parsed to or-chain {:?}", tags);
 
         Self { tags }
     }

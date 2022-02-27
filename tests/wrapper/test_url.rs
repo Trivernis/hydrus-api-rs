@@ -18,7 +18,10 @@ async fn it_imports() {
 
     url.import()
         .page(PageIdentifier::name("Rusty Import"))
-        .add_additional_tag(ServiceName::my_tags(), Tag::from("character:megumin"))
+        .add_additional_tag(
+            ServiceName::my_tags().into(),
+            Tag::from("character:megumin"),
+        )
         .run()
         .await
         .unwrap();

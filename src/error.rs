@@ -13,6 +13,7 @@ pub enum Error {
     ImportFailed(String),
     FileNotFound(FileIdentifier),
     InvalidMime(String),
+    BuildError(String),
 }
 
 impl fmt::Display for Error {
@@ -27,6 +28,7 @@ impl fmt::Display for Error {
             Self::ImportVetoed(msg) => write!(f, "File import vetoed: {}", msg),
             Self::FileNotFound(id) => write!(f, "File {:?} not found", id),
             Self::InvalidMime(mime) => write!(f, "Failed to parse invalid mime {}", mime),
+            Self::BuildError(error) => write!(f, "Build error {}", error),
         }
     }
 }

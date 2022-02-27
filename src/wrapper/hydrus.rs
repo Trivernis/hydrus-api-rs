@@ -10,6 +10,7 @@ use crate::wrapper::service::Services;
 use crate::wrapper::url::Url;
 use crate::wrapper::version::Version;
 use crate::Client;
+use std::fmt::Debug;
 
 /// A high level wrapper for the hydrus API for easier management of files, tags
 /// urls etc.
@@ -47,13 +48,13 @@ impl Hydrus {
     }
 
     /// Returns the address as an object that can be used to get and set cookies
-    pub fn address<S: AsRef<str>>(&self, address: S) -> Address {
+    pub fn address<S: AsRef<str> + Debug>(&self, address: S) -> Address {
         Address::from_str(self.client.clone(), address.as_ref())
     }
 
     /// Returns information about a given url in an object that allows
     /// further operations with that url
-    pub async fn url<S: AsRef<str>>(&self, url: S) -> Result<Url> {
+    pub async fn url<S: AsRef<str> + Debug>(&self, url: S) -> Result<Url> {
         let info = self.client.get_url_info(&url).await?;
 
         Ok(Url {
@@ -87,7 +88,7 @@ impl Hydrus {
     }
 
     /// Returns a hydrus page by page key
-    pub async fn page<S: AsRef<str>>(&self, page_key: S) -> Result<HydrusPage> {
+    pub async fn page<S: AsRef<str> + Debug>(&self, page_key: S) -> Result<HydrusPage> {
         let info_response = self.client.get_page_info(page_key).await?;
 
         Ok(HydrusPage::from_info(
@@ -107,7 +108,7 @@ impl Hydrus {
     }
 
     /// Sets the user agent hydrus uses for http requests
-    pub async fn set_user_agent<S: ToString>(&self, user_agent: S) -> Result<()> {
+    pub async fn set_user_agent<S: ToString + Debug>(&self, user_agent: S) -> Result<()> {
         self.client.set_user_agent(user_agent).await
     }
 }

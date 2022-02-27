@@ -112,6 +112,22 @@ impl Endpoint for SearchFiles {
     }
 }
 
+#[derive(Clone, Debug, Deserialize)]
+pub struct SearchFileHashesResponse {
+    pub hashes: Vec<String>,
+}
+
+pub struct SearchFileHashes;
+
+impl Endpoint for SearchFileHashes {
+    type Request = ();
+    type Response = SearchFileHashesResponse;
+
+    fn path() -> String {
+        String::from("get_files/search_files")
+    }
+}
+
 #[derive(Clone, Debug, Default, Deserialize)]
 pub struct FileMetadataResponse {
     pub metadata: Vec<FileMetadataInfo>,

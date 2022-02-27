@@ -6,6 +6,38 @@ pub struct BasicServiceInfo {
     pub service_key: String,
 }
 
+impl BasicServiceInfo {
+    /// Converts the Service into into an identifier
+    /// that can be used for requests consuming service references
+    pub fn into_id(self) -> ServiceIdentifier {
+        ServiceIdentifier::Key(self.service_key)
+    }
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, Hash, PartialOrd, PartialEq, Ord, Eq)]
+pub enum ServiceIdentifier {
+    /// Try to avoid using this variant as it will be removed from the interface
+    /// in the future
+    Name(String),
+    /// The key variant of a service which should be the preferred variant.
+    Key(String),
+}
+
+impl ServiceIdentifier {
+    /// Deprecation: use [ServiceIdentifier::key] instead.
+    #[deprecated(
+        note = "Deprecation in the official interface was mentioned. Use the service keys instead."
+    )]
+    pub fn name<S: ToString>(name: S) -> Self {
+        Self::Name(name.to_string())
+    }
+
+    /// Constructs a new type of the key variant.
+    pub fn key<S: ToString>(key: S) -> Self {
+        Self::Key(key.to_string())
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BasicHashList {
     pub hashes: Vec<String>,
@@ -21,6 +53,8 @@ pub struct FileMetadataInfo {
     pub width: Option<u32>,
     pub height: Option<u32>,
     pub duration: Option<u64>,
+    pub time_modified: Option<u64>,
+    pub file_services: FileMetadataServices,
     pub has_audio: Option<bool>,
     pub num_frames: Option<u64>,
     pub num_words: Option<u64>,
@@ -28,8 +62,12 @@ pub struct FileMetadataInfo {
     pub is_local: bool,
     pub is_trashed: bool,
     pub known_urls: Vec<String>,
+    #[deprecated]
     pub service_names_to_statuses_to_tags: HashMap<String, HashMap<String, Vec<String>>>,
+    pub service_keys_to_statuses_to_tags: HashMap<String, HashMap<String, Vec<String>>>,
+    #[deprecated]
     pub service_names_to_statuses_to_display_tags: HashMap<String, HashMap<String, Vec<String>>>,
+    pub service_keys_to_statuses_to_display_tags: HashMap<String, HashMap<String, Vec<String>>>,
 }
 
 #[derive(Clone, Debug)]
@@ -48,6 +86,23 @@ impl FileIdentifier {
 pub struct FileRecord {
     pub bytes: Vec<u8>,
     pub mime_type: String,
+}
+
+#[derive(Clone, Default, Debug, Deserialize)]
+pub struct FileMetadataServices {
+    pub current: HashMap<String, FileMetadataServiceCurrent>,
+    pub deleted: HashMap<String, FileMetadataServiceDeleted>,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+pub struct FileMetadataServiceCurrent {
+    pub time_imported: u64,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+pub struct FileMetadataServiceDeleted {
+    pub time_deleted: u64,
+    pub time_imported: u64,
 }
 
 #[derive(Clone, Debug, Deserialize)]

@@ -1,5 +1,6 @@
 use super::super::common;
 use hydrus_api::api_core::adding_urls::{AddUrlRequestBuilder, URL_TYPE_POST};
+use hydrus_api::api_core::common::ServiceIdentifier;
 
 #[tokio::test]
 async fn it_returns_files_for_an_url() {
@@ -25,11 +26,12 @@ async fn it_returns_url_information() {
 
 #[tokio::test]
 async fn it_adds_urls() {
+    #![allow(deprecated)]
     let client = common::get_client();
     let request = AddUrlRequestBuilder::default()
         .url("https://www.pixiv.net/member_illust.php?illust_id=83406361&mode=medium")
         .add_tags(
-            "my tags",
+            ServiceIdentifier::name("my tags"),
             vec!["ark mage".to_string(), "grinning".to_string()],
         )
         .show_destination_page(true)

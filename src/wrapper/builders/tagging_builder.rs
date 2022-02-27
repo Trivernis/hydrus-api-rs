@@ -1,6 +1,6 @@
 use crate::api_core::adding_tags::{AddTagsRequestBuilder, TagAction};
+use crate::api_core::common::ServiceIdentifier;
 use crate::error::Result;
-use crate::wrapper::service::ServiceName;
 use crate::wrapper::tag::Tag;
 use crate::Client;
 use std::collections::HashMap;
@@ -8,7 +8,7 @@ use std::collections::HashMap;
 pub struct TaggingBuilder {
     client: Client,
     hashes: Vec<String>,
-    tag_mappings: HashMap<ServiceName, HashMap<TagAction, Vec<Tag>>>,
+    tag_mappings: HashMap<ServiceIdentifier, HashMap<TagAction, Vec<Tag>>>,
 }
 
 impl TaggingBuilder {
@@ -28,12 +28,17 @@ impl TaggingBuilder {
     }
 
     /// Adds a single tag for a given service
-    pub fn add_tag(self, service: ServiceName, action: TagAction, tag: Tag) -> Self {
+    pub fn add_tag(self, service: ServiceIdentifier, action: TagAction, tag: Tag) -> Self {
         self.add_tags(service, action, vec![tag])
     }
 
     /// Adds tags with actions for the given service
-    pub fn add_tags(mut self, service: ServiceName, action: TagAction, mut tags: Vec<Tag>) -> Self {
+    pub fn add_tags(
+        mut self,
+        service: ServiceIdentifier,
+        action: TagAction,
+        mut tags: Vec<Tag>,
+    ) -> Self {
         let service_action_mappings =
             if let Some(service_action_mappings) = self.tag_mappings.get_mut(&service) {
                 service_action_mappings
@@ -57,7 +62,7 @@ impl TaggingBuilder {
             for (action, tags) in action_tag_mappings {
                 for tag in tags {
                     request = request.add_tag_with_action(
-                        service.0.clone(),
+                        service.clone().into(),
                         tag.to_string(),
                         action.clone(),
                     );
