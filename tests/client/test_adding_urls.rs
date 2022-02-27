@@ -26,6 +26,7 @@ async fn it_returns_url_information() {
 
 #[tokio::test]
 async fn it_adds_urls() {
+    #![allow(deprecated)]
     let client = common::get_client();
     let request = AddUrlRequestBuilder::default()
         .url("https://www.pixiv.net/member_illust.php?illust_id=83406361&mode=medium")

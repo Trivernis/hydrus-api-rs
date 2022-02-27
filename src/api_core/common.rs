@@ -16,15 +16,23 @@ impl BasicServiceInfo {
 
 #[derive(Clone, Debug, Serialize, Deserialize, Hash, PartialOrd, PartialEq, Ord, Eq)]
 pub enum ServiceIdentifier {
+    /// Try to avoid using this variant as it will be removed from the interface
+    /// in the future
     Name(String),
+    /// The key variant of a service which should be the preferred variant.
     Key(String),
 }
 
 impl ServiceIdentifier {
+    /// Deprecation: use [ServiceIdentifier::key] instead.
+    #[deprecated(
+        note = "Deprecation in the official interface was mentioned. Use the service keys instead."
+    )]
     pub fn name<S: ToString>(name: S) -> Self {
         Self::Name(name.to_string())
     }
 
+    /// Constructs a new type of the key variant.
     pub fn key<S: ToString>(key: S) -> Self {
         Self::Key(key.to_string())
     }
