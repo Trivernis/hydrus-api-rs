@@ -24,7 +24,8 @@
 //! let files = hydrus.search()
 //!     .add_tag(Tag::from("character:megumin"))
 //!     .add_tag(SystemTagBuilder::new().archive().build())
-//!     .add_tag(SystemTagBuilder::new().tag_namespace_as_number("page", Comparator::Equal, 5).negate().build())
+//!     .add_tag(SystemTagBuilder::new()
+//!         .tag_namespace_as_number("page", Comparator::Equal, 5).negate().build())
 //!     .add_or_chain(
 //!         OrChainBuilder::new()
 //!             .add_tag("summer".into())

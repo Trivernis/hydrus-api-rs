@@ -54,7 +54,10 @@ pub struct FileMetadataInfo {
     pub is_local: bool,
     pub is_trashed: bool,
     pub known_urls: Vec<String>,
+    #[deprecated]
     pub service_names_to_statuses_to_tags: HashMap<String, HashMap<String, Vec<String>>>,
+    pub service_keys_to_statuses_to_tags: HashMap<String, HashMap<String, Vec<String>>>,
+    #[deprecated]
     pub service_names_to_statuses_to_display_tags: HashMap<String, HashMap<String, Vec<String>>>,
     pub service_keys_to_statuses_to_display_tags: HashMap<String, HashMap<String, Vec<String>>>,
 }

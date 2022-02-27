@@ -239,11 +239,15 @@ impl HydrusFile {
         self.client.disassociate_urls(urls, vec![hash]).await
     }
 
-    /// Returns map mapping lists of tags to services
-    pub async fn services_with_tags(&mut self) -> Result<HashMap<ServiceName, Vec<Tag>>> {
+    /// Returns map mapping lists of tags to services.
+    ///
+    /// Deprecation: Use [HydrusFile::services_with_tags] instead.
+    #[deprecated(note = "Deprecated in the official API. Use services_with_tags instead.")]
+    pub async fn service_names_with_tags(&mut self) -> Result<HashMap<ServiceName, Vec<Tag>>> {
         let metadata = self.metadata().await?;
         let mut tag_mappings = HashMap::new();
 
+        #[allow(deprecated)]
         for (service, status_tags) in &metadata.service_names_to_statuses_to_tags {
             let mut tag_list = Vec::new();
 
@@ -251,6 +255,23 @@ impl HydrusFile {
                 tag_list.append(&mut tags.into_iter().map(|t| t.into()).collect())
             }
             tag_mappings.insert(ServiceName(service.clone()), tag_list);
+        }
+
+        Ok(tag_mappings)
+    }
+
+    /// Returns a mapping with service ids mapped to tags
+    pub async fn services_with_tags(&mut self) -> Result<HashMap<ServiceIdentifier, Vec<Tag>>> {
+        let metadata = self.metadata().await?;
+        let mut tag_mappings = HashMap::new();
+
+        for (service, status_tags) in &metadata.service_keys_to_statuses_to_tags {
+            let mut tag_list = Vec::new();
+
+            for (_, tags) in status_tags {
+                tag_list.append(&mut tags.into_iter().map(|t| t.into()).collect())
+            }
+            tag_mappings.insert(ServiceIdentifier::Key(service.clone()), tag_list);
         }
 
         Ok(tag_mappings)
