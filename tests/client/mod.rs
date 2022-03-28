@@ -5,3 +5,4 @@ mod test_adding_urls;
 mod test_managing_cookies_and_http_headers;
 mod test_managing_pages;
 mod test_searching_and_fetching_files;
+mod test_deleting_notes;
