@@ -80,6 +80,22 @@ impl FileIdentifier {
     pub fn hash<S: ToString>(hash: S) -> Self {
         Self::Hash(hash.to_string())
     }
+
+    pub fn as_hash(&self) -> Option<&String> {
+        if let Self::Hash(h) = &self {
+            Some(h)
+        } else {
+            None
+        }
+    }
+
+    pub fn as_id(&self) -> Option<u64> {
+        if let Self::ID(id) = &self {
+            Some(*id)
+        } else {
+            None
+        }
+    }
 }
 
 #[derive(Clone)]

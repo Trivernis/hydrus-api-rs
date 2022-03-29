@@ -1,14 +1,12 @@
 use super::super::common;
+use crate::common::test_data::{get_test_hashes, get_test_urls, TEST_URL_1};
 use hydrus_api::api_core::adding_urls::{AddUrlRequestBuilder, URL_TYPE_POST};
 use hydrus_api::api_core::common::ServiceIdentifier;
 
 #[tokio::test]
 async fn it_returns_files_for_an_url() {
     let client = common::get_client();
-    let response = client
-        .get_url_files("https://www.pixiv.net/member_illust.php?illust_id=83406361&mode=medium")
-        .await
-        .unwrap();
+    let response = client.get_url_files(TEST_URL_1).await.unwrap();
 
     assert!(response.normalised_url.len() > 0);
 }
@@ -16,10 +14,7 @@ async fn it_returns_files_for_an_url() {
 #[tokio::test]
 async fn it_returns_url_information() {
     let client = common::get_client();
-    let info = client
-        .get_url_info("https://www.pixiv.net/member_illust.php?illust_id=83406361&mode=medium")
-        .await
-        .unwrap();
+    let info = client.get_url_info(TEST_URL_1).await.unwrap();
     assert!(info.normalised_url.len() > 0);
     assert_eq!(info.url_type, URL_TYPE_POST);
 }
@@ -29,7 +24,7 @@ async fn it_adds_urls() {
     #![allow(deprecated)]
     let client = common::get_client();
     let request = AddUrlRequestBuilder::default()
-        .url("https://www.pixiv.net/member_illust.php?illust_id=83406361&mode=medium")
+        .url(TEST_URL_1)
         .add_tags(
             ServiceIdentifier::name("my tags"),
             vec!["ark mage".to_string(), "grinning".to_string()],
@@ -44,14 +39,9 @@ async fn it_adds_urls() {
 #[tokio::test]
 async fn it_associates_urls() {
     let client = common::get_client();
+    common::create_testdata(&client).await;
     client
-        .associate_urls(
-            vec![
-                "https://www.pixiv.net/member_illust.php?illust_id=83406361&mode=medium"
-                    .to_string(),
-            ],
-            vec!["0000000000000000000000000000000000000000000000000000000000000000".to_string()],
-        )
+        .associate_urls(get_test_urls(), get_test_hashes())
         .await
         .unwrap();
 }
@@ -59,14 +49,9 @@ async fn it_associates_urls() {
 #[tokio::test]
 async fn it_disassociates_urls() {
     let client = common::get_client();
+    common::create_testdata(&client).await;
     client
-        .disassociate_urls(
-            vec![
-                "https://www.pixiv.net/member_illust.php?illust_id=83406361&mode=medium"
-                    .to_string(),
-            ],
-            vec!["0000000000000000000000000000000000000000000000000000000000000000".to_string()],
-        )
+        .disassociate_urls(get_test_urls(), get_test_hashes())
         .await
         .unwrap();
 }

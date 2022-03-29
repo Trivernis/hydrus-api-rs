@@ -1,8 +1,11 @@
+use hydrus_api::api_core::adding_urls::AddUrlRequestBuilder;
 use hydrus_api::api_core::client::Client;
 use hydrus_api::Hydrus;
 use std::env;
 use std::sync::{Arc, Mutex, MutexGuard};
 use std::time::Duration;
+use test_data::TEST_URLS;
+pub mod test_data;
 
 pub fn setup() {
     lazy_static::lazy_static! { static ref SETUP_DONE: Arc<Mutex<bool>> = Arc::new(Mutex::new(false)); }
@@ -29,4 +32,13 @@ pub fn get_hydrus() -> Hydrus {
     let client = get_client();
 
     Hydrus::new(client)
+}
+
+pub async fn create_testdata(client: &Client) {
+    for url in TEST_URLS {
+        client
+            .add_url(AddUrlRequestBuilder::default().url(url).build())
+            .await
+            .unwrap();
+    }
 }

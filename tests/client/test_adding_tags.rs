@@ -1,4 +1,5 @@
 use super::super::common;
+use crate::common::test_data::EMPTY_HASH;
 use hydrus_api::api_core::adding_tags::{AddTagsRequestBuilder, TagAction};
 use hydrus_api::api_core::common::ServiceIdentifier;
 
@@ -22,7 +23,7 @@ async fn it_adds_tags() {
     #![allow(deprecated)]
     let client = common::get_client();
     let request = AddTagsRequestBuilder::default()
-        .add_hash("0000000000000000000000000000000000000000000000000000000000000000") // valid hash, I hope no files are affected
+        .add_hash(EMPTY_HASH) // valid hash, I hope no files are affected
         .add_tags(
             ServiceIdentifier::name("my tags"),
             vec!["beach".into(), "summer".into()],

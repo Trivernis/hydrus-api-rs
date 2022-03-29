@@ -2,6 +2,7 @@ use crate::api_core::adding_tags::{AddTagsRequestBuilder, TagAction};
 use crate::api_core::common::{FileIdentifier, FileMetadataInfo, FileRecord, ServiceIdentifier};
 use crate::error::{Error, Result};
 use crate::utils::tag_list_to_string_list;
+use crate::wrapper::builders::notes_builder::AddNotesBuilder;
 use crate::wrapper::service::ServiceName;
 use crate::wrapper::tag::Tag;
 use crate::Client;
@@ -316,6 +317,27 @@ impl HydrusFile {
         }
 
         self.client.add_tags(reqwest.build()).await
+    }
+
+    /// Creates a builder to add notes to the file
+    pub fn add_notes(&self) -> AddNotesBuilder {
+        AddNotesBuilder::new(self.client.clone(), self.id.clone())
+    }
+
+    /// Deletes a single note from the file
+    pub async fn delete_note<S1: ToString>(&self, name: S1) -> Result<()> {
+        self.client
+            .delete_notes(self.id.clone(), vec![name.to_string()])
+            .await
+    }
+
+    /// Deletes multiple notes from the file
+    pub async fn delete_notes<I: IntoIterator<Item = S>, S: ToString>(
+        &self,
+        names: I,
+    ) -> Result<()> {
+        let names = names.into_iter().map(|n: S| n.to_string()).collect();
+        self.client.delete_notes(self.id.clone(), names).await
     }
 
     /// Retrieves the file record bytes

@@ -6,6 +6,7 @@ use crate::api_core::adding_files::{
     AddFile, AddFileRequest, AddFileResponse, ArchiveFiles, ArchiveFilesRequest, DeleteFiles,
     DeleteFilesRequest, UnarchiveFiles, UnarchiveFilesRequest, UndeleteFiles, UndeleteFilesRequest,
 };
+use crate::api_core::adding_notes::{DeleteNotes, DeleteNotesRequest, SetNotes, SetNotesRequest};
 use crate::api_core::adding_tags::{AddTags, AddTagsRequest, CleanTags, CleanTagsResponse};
 use crate::api_core::adding_urls::{
     AddUrl, AddUrlRequest, AddUrlResponse, AssociateUrl, AssociateUrlRequest, GetUrlFiles,
@@ -33,6 +34,7 @@ use crate::utils::{
 use reqwest::Response;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
+use std::collections::HashMap;
 use std::fmt::Debug;
 
 static ACCESS_KEY_HEADER: &str = "Hydrus-Client-API-Access-Key";
@@ -371,6 +373,28 @@ impl Client {
             urls_to_delete: urls,
         })
         .await?;
+
+        Ok(())
+    }
+
+    /// Sets the notes for the file
+    #[tracing::instrument(skip(self), level = "debug")]
+    pub async fn set_notes(
+        &self,
+        id: FileIdentifier,
+        notes: HashMap<String, String>,
+    ) -> Result<()> {
+        self.post::<SetNotes>(SetNotesRequest::new(id, notes))
+            .await?;
+
+        Ok(())
+    }
+
+    /// Deletes the notes of a file
+    #[tracing::instrument(skip(self), level = "debug")]
+    pub async fn delete_notes(&self, id: FileIdentifier, note_names: Vec<String>) -> Result<()> {
+        self.post::<DeleteNotes>(DeleteNotesRequest::new(id, note_names))
+            .await?;
 
         Ok(())
     }

@@ -12,6 +12,7 @@ pub mod common;
 pub mod managing_cookies_and_http_headers;
 pub mod managing_pages;
 pub mod searching_and_fetching_files;
+pub mod adding_notes;
 
 pub use searching_and_fetching_files::file_sort_type;
 

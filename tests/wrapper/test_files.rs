@@ -74,6 +74,23 @@ async fn it_modifies_tags() {
 }
 
 #[tokio::test]
+async fn it_adds_notes() {
+    let file = get_file().await;
+    file.add_notes()
+        .add_note("My Note", "My notes content")
+        .add_notes(vec![("My note 2", "More content")])
+        .run()
+        .await
+        .unwrap();
+}
+
+#[tokio::test]
+async fn it_deletes_notes() {
+    let file = get_file().await;
+    file.delete_note("My Note").await.unwrap();
+}
+
+#[tokio::test]
 async fn it_retrieves_content() {
     let file = get_file().await;
     let file = file.retrieve().await.unwrap();
