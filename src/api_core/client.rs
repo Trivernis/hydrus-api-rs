@@ -28,16 +28,19 @@ use crate::api_core::searching_and_fetching_files::{
 };
 use crate::api_core::Endpoint;
 use crate::error::{Error, Result};
-use crate::utils::{
-    number_list_to_json_array, search_query_list_to_json_array, string_list_to_json_array,
-};
+use bytes::Buf;
 use reqwest::Response;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::collections::HashMap;
 use std::fmt::Debug;
 
-static ACCESS_KEY_HEADER: &str = "Hydrus-Client-API-Access-Key";
+const ACCESS_KEY_HEADER: &str = "Hydrus-Client-API-Access-Key";
+const CONTENT_TYPE_HEADER: &str = "Content-Type";
+#[cfg(feature = "cbor")]
+const CONTENT_TYPE_CBOR: &str = "application/cbor";
+#[cfg(feature = "json")]
+const CONTENT_TYPE_JSON: &str = "application/json";
 
 #[derive(Clone)]
 /// A low level Client for the hydrus API. It provides basic abstraction
@@ -63,94 +66,6 @@ impl Client {
             base_url: url.as_ref().to_string(),
         }
     }
-
-    /// Starts a get request to the path
-    #[tracing::instrument(skip(self), level = "trace")]
-    async fn get<E: Endpoint, Q: Serialize + Debug + ?Sized>(&self, query: &Q) -> Result<Response> {
-        tracing::trace!("GET request to {}", E::path());
-        let response = self
-            .inner
-            .get(format!("{}/{}", self.base_url, E::path()))
-            .header(ACCESS_KEY_HEADER, &self.access_key)
-            .query(query)
-            .send()
-            .await?;
-
-        Self::extract_error(response).await
-    }
-
-    /// Starts a get request to the path associated with the Endpoint Type
-    #[tracing::instrument(skip(self), level = "trace")]
-    async fn get_and_parse<E: Endpoint, Q: Serialize + Debug + ?Sized>(
-        &self,
-        query: &Q,
-    ) -> Result<E::Response> {
-        let response = self.get::<E, Q>(query).await?;
-
-        Self::extract_content(response).await
-    }
-
-    /// Stats a post request to the path associated with the Endpoint Type
-    #[tracing::instrument(skip(self), level = "trace")]
-    async fn post<E: Endpoint>(&self, body: E::Request) -> Result<Response> {
-        tracing::trace!("POST request to {}", E::path());
-        let response = self
-            .inner
-            .post(format!("{}/{}", self.base_url, E::path()))
-            .json(&body)
-            .header(ACCESS_KEY_HEADER, &self.access_key)
-            .send()
-            .await?;
-        let response = Self::extract_error(response).await?;
-        Ok(response)
-    }
-
-    /// Stats a post request and parses the body as json
-    #[tracing::instrument(skip(self), level = "trace")]
-    async fn post_and_parse<E: Endpoint>(&self, body: E::Request) -> Result<E::Response> {
-        let response = self.post::<E>(body).await?;
-
-        Self::extract_content(response).await
-    }
-
-    /// Stats a post request to the path associated with the return type
-    #[tracing::instrument(skip(self, data), level = "trace")]
-    async fn post_binary<E: Endpoint>(&self, data: Vec<u8>) -> Result<E::Response> {
-        tracing::trace!("Binary POST request to {}", E::path());
-        let response = self
-            .inner
-            .post(format!("{}/{}", self.base_url, E::path()))
-            .body(data)
-            .header(ACCESS_KEY_HEADER, &self.access_key)
-            .header("Content-Type", "application/octet-stream")
-            .send()
-            .await?;
-        let response = Self::extract_error(response).await?;
-
-        Self::extract_content(response).await
-    }
-
-    /// Returns an error with the response text content if the status doesn't indicate success
-    #[tracing::instrument(level = "trace")]
-    async fn extract_error(response: Response) -> Result<Response> {
-        if !response.status().is_success() {
-            let msg = response.text().await?;
-            tracing::error!("API returned error '{}'", msg);
-            Err(Error::Hydrus(msg))
-        } else {
-            Ok(response)
-        }
-    }
-
-    /// Parses the response as JSOn
-    #[tracing::instrument(level = "trace")]
-    async fn extract_content<T: DeserializeOwned + Debug>(response: Response) -> Result<T> {
-        let content = response.json::<T>().await?;
-        tracing::trace!("response content: {:?}", content);
-
-        Ok(content)
-    }
-
     /// Returns the current API version. It's being incremented every time the API changes.
     #[tracing::instrument(skip(self), level = "debug")]
     pub async fn api_version(&self) -> Result<ApiVersionResponse> {
@@ -230,7 +145,7 @@ impl Client {
     pub async fn clean_tags(&self, tags: Vec<String>) -> Result<CleanTagsResponse> {
         self.get_and_parse::<CleanTags, [(&str, String)]>(&[(
             "tags",
-            string_list_to_json_array(tags),
+            Self::serialize_query_object(tags)?,
         )])
         .await
     }
@@ -251,7 +166,7 @@ impl Client {
         options: FileSearchOptions,
     ) -> Result<SearchFilesResponse> {
         let mut args = options.into_query_args();
-        args.push(("tags", search_query_list_to_json_array(query)));
+        args.push(("tags", Self::serialize_query_object(query)?));
         self.get_and_parse::<SearchFiles, [(&str, String)]>(&args)
             .await
     }
@@ -264,7 +179,7 @@ impl Client {
         options: FileSearchOptions,
     ) -> Result<SearchFileHashesResponse> {
         let mut args = options.into_query_args();
-        args.push(("tags", search_query_list_to_json_array(query)));
+        args.push(("tags", Self::serialize_query_object(query)?));
         args.push(("return_hashes", String::from("true")));
         self.get_and_parse::<SearchFileHashes, [(&str, String)]>(&args)
             .await
@@ -278,9 +193,9 @@ impl Client {
         hashes: Vec<String>,
     ) -> Result<FileMetadataResponse> {
         let query = if file_ids.len() > 0 {
-            ("file_ids", number_list_to_json_array(file_ids))
+            ("file_ids", Self::serialize_query_object(file_ids)?)
         } else {
-            ("hashes", string_list_to_json_array(hashes))
+            ("hashes", Self::serialize_query_object(hashes)?)
         };
         self.get_and_parse::<FileMetadata, [(&str, String)]>(&[query])
             .await
@@ -473,5 +388,150 @@ impl Client {
             .await?;
 
         Ok(())
+    }
+
+    /// Starts a get request to the path
+    #[tracing::instrument(skip(self), level = "trace")]
+    async fn get<E: Endpoint, Q: Serialize + Debug + ?Sized>(&self, query: &Q) -> Result<Response> {
+        tracing::trace!("GET request to {}", E::path());
+        #[cfg(feature = "json")]
+        let content_type = CONTENT_TYPE_JSON;
+        #[cfg(feature = "cbor")]
+        let content_type = CONTENT_TYPE_CBOR;
+        #[cfg(feature = "json")]
+        let params: [(&str, &str); 0] = [];
+        #[cfg(feature = "cbor")]
+        let params = [("cbor", true)];
+
+        let response = self
+            .inner
+            .get(format!("{}/{}", self.base_url, E::path()))
+            .header(ACCESS_KEY_HEADER, &self.access_key)
+            .header(CONTENT_TYPE_HEADER, content_type)
+            .query(query)
+            .query(&params)
+            .send()
+            .await?;
+
+        Self::extract_error(response).await
+    }
+
+    /// Starts a get request to the path associated with the Endpoint Type
+    #[tracing::instrument(skip(self), level = "trace")]
+    async fn get_and_parse<E: Endpoint, Q: Serialize + Debug + ?Sized>(
+        &self,
+        query: &Q,
+    ) -> Result<E::Response> {
+        let response = self.get::<E, Q>(query).await?;
+
+        Self::extract_content(response).await
+    }
+
+    /// Serializes a given object into a json or cbor query object
+    #[tracing::instrument(skip(obj), level = "trace")]
+    fn serialize_query_object<S: Serialize>(obj: S) -> Result<String> {
+        #[cfg(feature = "json")]
+        {
+            serde_json::ser::to_string(&obj).map_err(|e| Error::Serialization(e.to_string()))
+        }
+
+        #[cfg(feature = "cbor")]
+        {
+            let mut buf = Vec::new();
+            ciborium::ser::into_writer(&obj, &mut buf)
+                .map_err(|e| Error::Serialization(e.to_string()))?;
+            Ok(base64::encode(buf))
+        }
+    }
+
+    /// Stats a post request to the path associated with the Endpoint Type
+    #[tracing::instrument(skip(self), level = "trace")]
+    async fn post<E: Endpoint>(&self, body: E::Request) -> Result<Response> {
+        tracing::trace!("POST request to {}", E::path());
+        let body = Self::serialize_body(body)?;
+
+        #[cfg(feature = "cbor")]
+        let content_type = CONTENT_TYPE_CBOR;
+        #[cfg(feature = "json")]
+        let content_type = CONTENT_TYPE_JSON;
+
+        let response = self
+            .inner
+            .post(format!("{}/{}", self.base_url, E::path()))
+            .body(body)
+            .header(ACCESS_KEY_HEADER, &self.access_key)
+            .header("Content-Type", content_type)
+            .send()
+            .await?;
+        let response = Self::extract_error(response).await?;
+        Ok(response)
+    }
+
+    /// Serializes a body into either CBOR or JSON
+    #[tracing::instrument(skip(body), level = "trace")]
+    fn serialize_body<S: Serialize>(body: S) -> Result<Vec<u8>> {
+        let mut buf = Vec::new();
+        #[cfg(feature = "cbor")]
+        ciborium::ser::into_writer(&body, &mut buf)
+            .map_err(|e| Error::Serialization(e.to_string()))?;
+        #[cfg(feature = "json")]
+        serde_json::to_writer(&mut buf, &body).map_err(|e| Error::Serialization(e.to_string()))?;
+
+        Ok(buf)
+    }
+
+    /// Stats a post request and parses the body as json
+    #[tracing::instrument(skip(self), level = "trace")]
+    async fn post_and_parse<E: Endpoint>(&self, body: E::Request) -> Result<E::Response> {
+        let response = self.post::<E>(body).await?;
+
+        Self::extract_content(response).await
+    }
+
+    /// Stats a post request to the path associated with the return type
+    /// This currently only supports JSON because of a limitation of the
+    /// hydrus client api.
+    #[tracing::instrument(skip(self, data), level = "trace")]
+    async fn post_binary<E: Endpoint>(&self, data: Vec<u8>) -> Result<E::Response> {
+        tracing::trace!("Binary POST request to {}", E::path());
+        let response = self
+            .inner
+            .post(format!("{}/{}", self.base_url, E::path()))
+            .body(data)
+            .header(ACCESS_KEY_HEADER, &self.access_key)
+            .header(CONTENT_TYPE_HEADER, "application/octet-stream")
+            .send()
+            .await?;
+        let response = Self::extract_error(response).await?;
+
+        response.json::<E::Response>().await.map_err(Error::from)
+    }
+
+    /// Returns an error with the response text content if the status doesn't indicate success
+    #[tracing::instrument(level = "trace")]
+    async fn extract_error(response: Response) -> Result<Response> {
+        if !response.status().is_success() {
+            let msg = response.text().await?;
+            tracing::error!("API returned error '{}'", msg);
+            Err(Error::Hydrus(msg))
+        } else {
+            Ok(response)
+        }
+    }
+
+    /// Parses the response as JSOn
+    #[tracing::instrument(level = "trace")]
+    async fn extract_content<T: DeserializeOwned + Debug>(response: Response) -> Result<T> {
+        let bytes = response.bytes().await?;
+        let reader = bytes.reader();
+        #[cfg(feature = "json")]
+        let content = serde_json::from_reader::<_, T>(reader)
+            .map_err(|e| Error::Deserialization(e.to_string()))?;
+        #[cfg(feature = "cbor")]
+        let content =
+            ciborium::de::from_reader(reader).map_err(|e| Error::Deserialization(e.to_string()))?;
+        tracing::trace!("response content: {:?}", content);
+
+        Ok(content)
     }
 }
