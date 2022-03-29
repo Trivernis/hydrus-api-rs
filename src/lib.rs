@@ -3,6 +3,10 @@
 //! token that can be retrieved in the hydrus client from the *review services* dialog.
 //! Different actions require different permissions, you can read about it in the [official docs](https://hydrusnetwork.github.io/hydrus/help/client_api.html).
 //!
+//! Starting with hydrus version 477, CBOR can be used as an alternative to JSON.
+//! CBOR support can be enabled with the `cbor` feature of this crate. This feature is
+//! incompatible with the `json` feature which is enabled by default.
+//!
 //! ## Hydrus Usage Example
 //!
 //! ```
@@ -88,3 +92,9 @@ pub mod api_core;
 pub mod error;
 pub mod utils;
 pub mod wrapper;
+
+#[cfg(all(feature = "cbor", feature = "json"))]
+compile_error!("Feature 'cbor' and 'json' cannot be enabled at the same time");
+
+#[cfg(not(any(feature = "cbor", feature = "json")))]
+compile_error!("Either the 'json' or 'cbor' feature must be selected.");

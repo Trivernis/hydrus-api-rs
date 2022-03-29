@@ -14,6 +14,8 @@ pub enum Error {
     FileNotFound(FileIdentifier),
     InvalidMime(String),
     BuildError(String),
+    Serialization(String),
+    Deserialization(String),
 }
 
 impl fmt::Display for Error {
@@ -24,11 +26,13 @@ impl fmt::Display for Error {
             Self::InvalidServiceType(service_type) => {
                 write!(f, "Invalid Service Type '{}'", service_type)
             }
-            Self::ImportFailed(msg) => write!(f, "File import failed: {}", msg),
-            Self::ImportVetoed(msg) => write!(f, "File import vetoed: {}", msg),
+            Self::ImportFailed(msg) => write!(f, "File import failed: {msg}"),
+            Self::ImportVetoed(msg) => write!(f, "File import vetoed: {msg}"),
             Self::FileNotFound(id) => write!(f, "File {:?} not found", id),
-            Self::InvalidMime(mime) => write!(f, "Failed to parse invalid mime {}", mime),
-            Self::BuildError(error) => write!(f, "Build error {}", error),
+            Self::InvalidMime(mime) => write!(f, "Failed to parse invalid mime {mime}"),
+            Self::BuildError(error) => write!(f, "Build error {error}"),
+            Self::Serialization(msg) => write!(f, "Failed to serialize request {msg}"),
+            Self::Deserialization(msg) => write!(f, "Failed to deserialize request {msg}"),
         }
     }
 }
