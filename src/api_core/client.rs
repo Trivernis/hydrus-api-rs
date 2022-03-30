@@ -106,9 +106,8 @@ impl Client {
 
     /// Moves files with matching hashes to the trash
     #[tracing::instrument(skip(self), level = "debug")]
-    pub async fn delete_files(&self, hashes: Vec<String>) -> Result<()> {
-        self.post::<DeleteFiles>(DeleteFilesRequest { hashes })
-            .await?;
+    pub async fn delete_files(&self, request: DeleteFilesRequest) -> Result<()> {
+        self.post::<DeleteFiles>(request).await?;
 
         Ok(())
     }
@@ -180,7 +179,7 @@ impl Client {
     ) -> Result<SearchFileHashesResponse> {
         let mut args = options.into_query_args();
         args.push(("tags", Self::serialize_query_object(query)?));
-        args.push(("return_hashes", String::from("true")));
+        args.push(("return_hashes", Self::serialize_query_object(true)?));
         self.get_and_parse::<SearchFileHashes, [(&str, String)]>(&args)
             .await
     }
@@ -432,11 +431,13 @@ impl Client {
     fn serialize_query_object<S: Serialize>(obj: S) -> Result<String> {
         #[cfg(feature = "json")]
         {
+            tracing::trace!("Serializing query to JSON");
             serde_json::ser::to_string(&obj).map_err(|e| Error::Serialization(e.to_string()))
         }
 
         #[cfg(feature = "cbor")]
         {
+            tracing::trace!("Serializing query to CBOR");
             let mut buf = Vec::new();
             ciborium::ser::into_writer(&obj, &mut buf)
                 .map_err(|e| Error::Serialization(e.to_string()))?;
@@ -471,11 +472,19 @@ impl Client {
     #[tracing::instrument(skip(body), level = "trace")]
     fn serialize_body<S: Serialize>(body: S) -> Result<Vec<u8>> {
         let mut buf = Vec::new();
-        #[cfg(feature = "cbor")]
-        ciborium::ser::into_writer(&body, &mut buf)
-            .map_err(|e| Error::Serialization(e.to_string()))?;
+
         #[cfg(feature = "json")]
-        serde_json::to_writer(&mut buf, &body).map_err(|e| Error::Serialization(e.to_string()))?;
+        {
+            tracing::trace!("Serializing body to JSON");
+            serde_json::to_writer(&mut buf, &body)
+                .map_err(|e| Error::Serialization(e.to_string()))?;
+        }
+        #[cfg(feature = "cbor")]
+        {
+            tracing::trace!("Serializing body to CBOR");
+            ciborium::ser::into_writer(&body, &mut buf)
+                .map_err(|e| Error::Serialization(e.to_string()))?;
+        }
 
         Ok(buf)
     }
@@ -525,11 +534,16 @@ impl Client {
         let bytes = response.bytes().await?;
         let reader = bytes.reader();
         #[cfg(feature = "json")]
-        let content = serde_json::from_reader::<_, T>(reader)
-            .map_err(|e| Error::Deserialization(e.to_string()))?;
+        let content = {
+            tracing::trace!("Deserializing content from JSON");
+            serde_json::from_reader::<_, T>(reader)
+                .map_err(|e| Error::Deserialization(e.to_string()))?
+        };
         #[cfg(feature = "cbor")]
-        let content =
-            ciborium::de::from_reader(reader).map_err(|e| Error::Deserialization(e.to_string()))?;
+        let content = {
+            tracing::trace!("Deserializing content from CBOR");
+            ciborium::de::from_reader(reader).map_err(|e| Error::Deserialization(e.to_string()))?
+        };
         tracing::trace!("response content: {:?}", content);
 
         Ok(content)

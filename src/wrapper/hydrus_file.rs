@@ -2,6 +2,7 @@ use crate::api_core::adding_tags::{AddTagsRequestBuilder, TagAction};
 use crate::api_core::common::{FileIdentifier, FileMetadataInfo, FileRecord, ServiceIdentifier};
 use crate::error::{Error, Result};
 use crate::utils::tag_list_to_string_list;
+use crate::wrapper::builders::delete_files_builder::DeleteFilesBuilder;
 use crate::wrapper::builders::notes_builder::AddNotesBuilder;
 use crate::wrapper::service::ServiceName;
 use crate::wrapper::tag::Tag;
@@ -227,6 +228,19 @@ impl HydrusFile {
             .map(|millis| Utc.timestamp_millis(millis as i64).naive_utc());
 
         Ok(naive_time_deleted)
+    }
+
+    /// Creates a request builder to delete the file
+    pub fn delete(&mut self) -> DeleteFilesBuilder {
+        self.metadata = None;
+        DeleteFilesBuilder::new(self.client.clone()).add_file(self.id.clone())
+    }
+
+    /// Undeletes the file
+    pub async fn undelete(&mut self) -> Result<()> {
+        let hash = self.hash().await?;
+        self.metadata = None;
+        self.client.undelete_files(vec![hash]).await
     }
 
     /// Associates the file with a list of urls

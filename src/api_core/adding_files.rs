@@ -1,5 +1,6 @@
-use crate::api_core::common::BasicHashList;
+use crate::api_core::common::{BasicHashList, ServiceIdentifier};
 use crate::api_core::Endpoint;
+use serde::Serialize;
 
 pub static STATUS_IMPORT_SUCCESS: u8 = 1;
 pub static STATUS_IMPORT_ALREADY_EXISTS: u8 = 2;
@@ -30,7 +31,42 @@ impl Endpoint for AddFile {
     }
 }
 
-pub type DeleteFilesRequest = BasicHashList;
+#[derive(Clone, Debug, Serialize)]
+pub struct DeleteFilesRequest {
+    /// The files by hashes to delete
+    pub hashes: Vec<String>,
+    /// The files by file ids to delete
+    pub file_ids: Vec<u64>,
+    pub file_service_name: Option<String>,
+    pub file_service_key: Option<String>,
+    pub reason: Option<String>,
+}
+
+impl DeleteFilesRequest {
+    pub fn new(hashes: Vec<String>, file_ids: Vec<u64>) -> Self {
+        Self {
+            hashes,
+            file_ids,
+            file_service_key: None,
+            file_service_name: None,
+            reason: None,
+        }
+    }
+
+    /// Sets the service to delete from. If none is given it deletes
+    /// from all files.
+    pub fn set_service(&mut self, service: ServiceIdentifier) {
+        match service {
+            ServiceIdentifier::Name(name) => self.file_service_name = Some(name),
+            ServiceIdentifier::Key(key) => self.file_service_key = Some(key),
+        }
+    }
+
+    /// Sets the reason for deletion
+    pub fn set_reason<S: ToString>(&mut self, reason: S) {
+        self.reason = Some(reason.to_string());
+    }
+}
 
 pub struct DeleteFiles;
 
