@@ -1,4 +1,7 @@
-use crate::api_core::common::{FileIdentifier, FileMetadataInfo, FileRecord, ServiceIdentifier};
+use crate::api_core::common::{
+    FileIdentifier, FileMetadataInfo, FileRecord, FileSelection, FileServiceSelection,
+    ServiceIdentifier,
+};
 use crate::api_core::endpoints::adding_tags::{AddTagsRequestBuilder, TagAction};
 use crate::error::{Error, Result};
 use crate::utils::tag_list_to_string_list;
@@ -240,7 +243,9 @@ impl HydrusFile {
     pub async fn undelete(&mut self) -> Result<()> {
         let hash = self.hash().await?;
         self.metadata = None;
-        self.client.undelete_files(vec![hash]).await
+        self.client
+            .undelete_files(FileSelection::by_hash(hash), FileServiceSelection::none())
+            .await
     }
 
     /// Associates the file with a list of urls

@@ -1,4 +1,7 @@
-use crate::api_core::common::{FileIdentifier, FileMetadataInfo, FileRecord, OptionalStringNumber};
+use crate::api_core::common::{
+    FileIdentifier, FileMetadataInfo, FileRecord, FileSelection, FileServiceSelection,
+    OptionalStringNumber,
+};
 use crate::api_core::endpoints::access_management::{
     ApiVersion, ApiVersionResponse, GetServices, GetServicesResponse, SessionKey,
     SessionKeyResponse, VerifyAccessKey, VerifyAccessKeyResponse,
@@ -110,35 +113,66 @@ impl Client {
 
     /// Moves files with matching hashes to the trash
     #[tracing::instrument(skip(self), level = "debug")]
-    pub async fn delete_files(&self, request: DeleteFilesRequest) -> Result<()> {
-        self.post::<DeleteFiles>(request).await?;
+    pub async fn delete_files(
+        &self,
+        files: FileSelection,
+        service: FileServiceSelection,
+        reason: Option<String>,
+    ) -> Result<()> {
+        self.post::<DeleteFiles>(DeleteFilesRequest {
+            file_selection: files,
+            service_selection: service,
+            reason,
+        })
+        .await?;
 
         Ok(())
     }
 
     /// Pulls files out of the trash by hash
     #[tracing::instrument(skip(self), level = "debug")]
-    pub async fn undelete_files(&self, hashes: Vec<String>) -> Result<()> {
-        self.post::<UndeleteFiles>(UndeleteFilesRequest { hashes })
-            .await?;
+    pub async fn undelete_files(
+        &self,
+        files: FileSelection,
+        service: FileServiceSelection,
+    ) -> Result<()> {
+        self.post::<UndeleteFiles>(UndeleteFilesRequest {
+            file_selection: files,
+            service_selection: service,
+        })
+        .await?;
 
         Ok(())
     }
 
     /// Moves files from the inbox into the archive
     #[tracing::instrument(skip(self), level = "debug")]
-    pub async fn archive_files(&self, hashes: Vec<String>) -> Result<()> {
-        self.post::<ArchiveFiles>(ArchiveFilesRequest { hashes })
-            .await?;
+    pub async fn archive_files(
+        &self,
+        files: FileSelection,
+        service: FileServiceSelection,
+    ) -> Result<()> {
+        self.post::<ArchiveFiles>(ArchiveFilesRequest {
+            file_selection: files,
+            service_selection: service,
+        })
+        .await?;
 
         Ok(())
     }
 
     /// Moves files from the archive into the inbox
     #[tracing::instrument(skip(self), level = "debug")]
-    pub async fn unarchive_files(&self, hashes: Vec<String>) -> Result<()> {
-        self.post::<UnarchiveFiles>(UnarchiveFilesRequest { hashes })
-            .await?;
+    pub async fn unarchive_files(
+        &self,
+        files: FileSelection,
+        service: FileServiceSelection,
+    ) -> Result<()> {
+        self.post::<UnarchiveFiles>(UnarchiveFilesRequest {
+            file_selection: files,
+            service_selection: service,
+        })
+        .await?;
 
         Ok(())
     }

@@ -1,4 +1,4 @@
-use crate::api_core::common::{BasicHashList, ServiceIdentifier};
+use crate::api_core::common::{FileSelection, FileServiceSelection};
 use crate::api_core::endpoints::Endpoint;
 use serde::Serialize;
 
@@ -33,39 +33,11 @@ impl Endpoint for AddFile {
 
 #[derive(Clone, Debug, Serialize)]
 pub struct DeleteFilesRequest {
-    /// The files by hashes to delete
-    pub hashes: Vec<String>,
-    /// The files by file ids to delete
-    pub file_ids: Vec<u64>,
-    pub file_service_name: Option<String>,
-    pub file_service_key: Option<String>,
+    #[serde(flatten)]
+    pub file_selection: FileSelection,
+    #[serde(flatten)]
+    pub service_selection: FileServiceSelection,
     pub reason: Option<String>,
-}
-
-impl DeleteFilesRequest {
-    pub fn new(hashes: Vec<String>, file_ids: Vec<u64>) -> Self {
-        Self {
-            hashes,
-            file_ids,
-            file_service_key: None,
-            file_service_name: None,
-            reason: None,
-        }
-    }
-
-    /// Sets the service to delete from. If none is given it deletes
-    /// from all files.
-    pub fn set_service(&mut self, service: ServiceIdentifier) {
-        match service {
-            ServiceIdentifier::Name(name) => self.file_service_name = Some(name),
-            ServiceIdentifier::Key(key) => self.file_service_key = Some(key),
-        }
-    }
-
-    /// Sets the reason for deletion
-    pub fn set_reason<S: ToString>(&mut self, reason: S) {
-        self.reason = Some(reason.to_string());
-    }
 }
 
 pub struct DeleteFiles;
@@ -79,7 +51,14 @@ impl Endpoint for DeleteFiles {
     }
 }
 
-pub type UndeleteFilesRequest = BasicHashList;
+#[derive(Clone, Debug, Serialize)]
+pub struct UndeleteFilesRequest {
+    #[serde(flatten)]
+    pub file_selection: FileSelection,
+    #[serde(flatten)]
+    pub service_selection: FileServiceSelection,
+}
+
 pub struct UndeleteFiles;
 
 impl Endpoint for UndeleteFiles {
@@ -91,7 +70,14 @@ impl Endpoint for UndeleteFiles {
     }
 }
 
-pub type ArchiveFilesRequest = BasicHashList;
+#[derive(Clone, Debug, Serialize)]
+pub struct ArchiveFilesRequest {
+    #[serde(flatten)]
+    pub file_selection: FileSelection,
+    #[serde(flatten)]
+    pub service_selection: FileServiceSelection,
+}
+
 pub struct ArchiveFiles;
 
 impl Endpoint for ArchiveFiles {
@@ -103,11 +89,18 @@ impl Endpoint for ArchiveFiles {
     }
 }
 
-pub type UnarchiveFilesRequest = BasicHashList;
+#[derive(Clone, Debug, Serialize)]
+pub struct UnarchiveFilesRequest {
+    #[serde(flatten)]
+    pub file_selection: FileSelection,
+    #[serde(flatten)]
+    pub service_selection: FileServiceSelection,
+}
+
 pub struct UnarchiveFiles;
 
 impl Endpoint for UnarchiveFiles {
-    type Request = UndeleteFilesRequest;
+    type Request = UnarchiveFilesRequest;
     type Response = ();
 
     fn path() -> String {

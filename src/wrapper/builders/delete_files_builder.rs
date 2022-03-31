@@ -1,5 +1,6 @@
-use crate::api_core::common::{FileIdentifier, ServiceIdentifier};
-use crate::api_core::endpoints::adding_files::DeleteFilesRequest;
+use crate::api_core::common::{
+    FileIdentifier, FileSelection, FileServiceSelection, ServiceIdentifier,
+};
 use crate::error::Result;
 use crate::Client;
 
@@ -53,20 +54,18 @@ impl DeleteFilesBuilder {
 
     /// Deletes all files specified in this builder
     pub async fn run(self) -> Result<()> {
-        let mut request = DeleteFilesRequest {
-            reason: self.reason,
+        let file_selection = FileSelection {
             hashes: self.hashes,
             file_ids: self.ids,
-            file_service_key: None,
-            file_service_name: None,
+            ..Default::default()
         };
-        if let Some(service) = self.service {
-            match service {
-                ServiceIdentifier::Name(name) => request.file_service_name = Some(name),
-                ServiceIdentifier::Key(key) => request.file_service_key = Some(key),
-            }
-        }
+        let service_selection = self
+            .service
+            .map(FileServiceSelection::from)
+            .unwrap_or_default();
 
-        self.client.delete_files(request).await
+        self.client
+            .delete_files(file_selection, service_selection, self.reason)
+            .await
     }
 }
