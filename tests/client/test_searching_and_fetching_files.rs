@@ -1,7 +1,9 @@
 use super::super::common;
 use hydrus_api::api_core::common::FileIdentifier;
-use hydrus_api::api_core::file_sort_type::SORT_FILE_PIXEL_COUNT;
-use hydrus_api::api_core::searching_and_fetching_files::{FileSearchOptions, SearchQueryEntry};
+use hydrus_api::api_core::endpoints::searching_and_fetching_files::file_sort_type::SORT_FILE_PIXEL_COUNT;
+use hydrus_api::api_core::endpoints::searching_and_fetching_files::{
+    FileSearchOptions, SearchQueryEntry,
+};
 
 #[tokio::test]
 async fn is_searches_files() {

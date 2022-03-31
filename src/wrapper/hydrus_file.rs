@@ -1,5 +1,5 @@
-use crate::api_core::adding_tags::{AddTagsRequestBuilder, TagAction};
 use crate::api_core::common::{FileIdentifier, FileMetadataInfo, FileRecord, ServiceIdentifier};
+use crate::api_core::endpoints::adding_tags::{AddTagsRequestBuilder, TagAction};
 use crate::error::{Error, Result};
 use crate::utils::tag_list_to_string_list;
 use crate::wrapper::builders::delete_files_builder::DeleteFilesBuilder;

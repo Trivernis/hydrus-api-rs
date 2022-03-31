@@ -1,5 +1,5 @@
-use hydrus_api::api_core::adding_urls::AddUrlRequestBuilder;
 use hydrus_api::api_core::client::Client;
+use hydrus_api::api_core::endpoints::adding_urls::AddUrlRequestBuilder;
 use hydrus_api::Hydrus;
 use std::env;
 use std::sync::{Arc, Mutex, MutexGuard};

@@ -1,4 +1,6 @@
-use crate::api_core::searching_and_fetching_files::{FileSearchOptions, SearchQueryEntry};
+use crate::api_core::endpoints::searching_and_fetching_files::{
+    FileSearchOptions, SearchQueryEntry,
+};
 use crate::error::Result;
 use crate::wrapper::hydrus_file::HydrusFile;
 use crate::wrapper::or_chain::OrChain;

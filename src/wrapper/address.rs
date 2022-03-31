@@ -1,5 +1,5 @@
 use crate::api_core::common::OptionalStringNumber;
-use crate::api_core::managing_cookies_and_http_headers::CookieBuilder;
+use crate::api_core::endpoints::managing_cookies_and_http_headers::CookieBuilder;
 use crate::error::Result;
 use crate::Client;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};

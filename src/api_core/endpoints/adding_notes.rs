@@ -1,5 +1,5 @@
 use crate::api_core::common::FileIdentifier;
-use crate::api_core::Endpoint;
+use crate::api_core::endpoints::Endpoint;
 use std::collections::HashMap;
 
 pub struct SetNotes;

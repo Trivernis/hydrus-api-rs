@@ -1,5 +1,5 @@
 use crate::api_core::common::ServiceIdentifier;
-use crate::api_core::Endpoint;
+use crate::api_core::endpoints::Endpoint;
 use serde::Serialize;
 use std::collections::HashMap;
 
@@ -74,7 +74,7 @@ pub struct AddUrlRequest {
 ///
 /// Example:
 /// ```
-/// use hydrus_api::api_core::adding_urls::AddUrlRequestBuilder;
+/// use hydrus_api::api_core::endpoints::adding_urls::AddUrlRequestBuilder;
 /// use hydrus_api::api_core::common::ServiceIdentifier;
 ///
 /// let request = AddUrlRequestBuilder::default()

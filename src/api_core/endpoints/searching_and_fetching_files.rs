@@ -1,5 +1,5 @@
 use crate::api_core::common::FileMetadataInfo;
-use crate::api_core::Endpoint;
+use crate::api_core::endpoints::Endpoint;
 
 pub mod file_sort_type {
     pub const SORT_FILE_SIZE: u8 = 0;

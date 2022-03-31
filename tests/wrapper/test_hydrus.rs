@@ -1,5 +1,5 @@
 use super::super::common;
-use hydrus_api::api_core::adding_tags::TagAction;
+use hydrus_api::api_core::endpoints::adding_tags::TagAction;
 use hydrus_api::wrapper::builders::or_chain_builder::OrChainBuilder;
 use hydrus_api::wrapper::builders::search_builder::SortType;
 use hydrus_api::wrapper::builders::tag_builder::TagBuilder;

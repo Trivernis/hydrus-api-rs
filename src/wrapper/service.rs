@@ -1,5 +1,5 @@
-use crate::api_core::access_management::GetServicesResponse;
-use crate::api_core::access_management::{
+use crate::api_core::endpoints::access_management::GetServicesResponse;
+use crate::api_core::endpoints::access_management::{
     SERVICE_TYPE_ALL_KNOWN_FILES, SERVICE_TYPE_ALL_KNOWN_TAGS, SERVICE_TYPE_ALL_LOCAL_FILES,
     SERVICE_TYPE_FILE_REPOSITORIES, SERVICE_TYPE_LOCAL_FILES, SERVICE_TYPE_LOCAL_TAGS,
     SERVICE_TYPE_TAG_REPOSITORIES, SERVICE_TYPE_TRASH,

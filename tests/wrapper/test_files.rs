@@ -1,8 +1,8 @@
 use super::super::common;
 use crate::common::test_data::TEST_HASH_2;
 use crate::common::{create_testdata, get_client};
-use hydrus_api::api_core::adding_tags::TagAction;
 use hydrus_api::api_core::common::FileIdentifier;
+use hydrus_api::api_core::endpoints::adding_tags::TagAction;
 use hydrus_api::wrapper::hydrus_file::HydrusFile;
 use hydrus_api::wrapper::service::ServiceName;
 

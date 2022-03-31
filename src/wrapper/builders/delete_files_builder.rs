@@ -1,5 +1,5 @@
-use crate::api_core::adding_files::DeleteFilesRequest;
 use crate::api_core::common::{FileIdentifier, ServiceIdentifier};
+use crate::api_core::endpoints::adding_files::DeleteFilesRequest;
 use crate::error::Result;
 use crate::Client;
 

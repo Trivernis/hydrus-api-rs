@@ -1,32 +1,36 @@
-use crate::api_core::access_management::{
+use crate::api_core::common::{FileIdentifier, FileMetadataInfo, FileRecord, OptionalStringNumber};
+use crate::api_core::endpoints::access_management::{
     ApiVersion, ApiVersionResponse, GetServices, GetServicesResponse, SessionKey,
     SessionKeyResponse, VerifyAccessKey, VerifyAccessKeyResponse,
 };
-use crate::api_core::adding_files::{
+use crate::api_core::endpoints::adding_files::{
     AddFile, AddFileRequest, AddFileResponse, ArchiveFiles, ArchiveFilesRequest, DeleteFiles,
     DeleteFilesRequest, UnarchiveFiles, UnarchiveFilesRequest, UndeleteFiles, UndeleteFilesRequest,
 };
-use crate::api_core::adding_notes::{DeleteNotes, DeleteNotesRequest, SetNotes, SetNotesRequest};
-use crate::api_core::adding_tags::{AddTags, AddTagsRequest, CleanTags, CleanTagsResponse};
-use crate::api_core::adding_urls::{
+use crate::api_core::endpoints::adding_notes::{
+    DeleteNotes, DeleteNotesRequest, SetNotes, SetNotesRequest,
+};
+use crate::api_core::endpoints::adding_tags::{
+    AddTags, AddTagsRequest, CleanTags, CleanTagsResponse,
+};
+use crate::api_core::endpoints::adding_urls::{
     AddUrl, AddUrlRequest, AddUrlResponse, AssociateUrl, AssociateUrlRequest, GetUrlFiles,
     GetUrlFilesResponse, GetUrlInfo, GetUrlInfoResponse,
 };
-use crate::api_core::client_builder::ClientBuilder;
-use crate::api_core::common::{FileIdentifier, FileMetadataInfo, FileRecord, OptionalStringNumber};
-use crate::api_core::managing_cookies_and_http_headers::{
+use crate::api_core::endpoints::client_builder::ClientBuilder;
+use crate::api_core::endpoints::managing_cookies_and_http_headers::{
     GetCookies, GetCookiesResponse, SetCookies, SetCookiesRequest, SetUserAgent,
     SetUserAgentRequest,
 };
-use crate::api_core::managing_pages::{
+use crate::api_core::endpoints::managing_pages::{
     AddFiles, AddFilesRequest, FocusPage, FocusPageRequest, GetPageInfo, GetPageInfoResponse,
     GetPages, GetPagesResponse,
 };
-use crate::api_core::searching_and_fetching_files::{
+use crate::api_core::endpoints::searching_and_fetching_files::{
     FileMetadata, FileMetadataResponse, FileSearchOptions, GetFile, SearchFileHashes,
     SearchFileHashesResponse, SearchFiles, SearchFilesResponse, SearchQueryEntry,
 };
-use crate::api_core::Endpoint;
+use crate::api_core::endpoints::Endpoint;
 use crate::error::{Error, Result};
 use bytes::Buf;
 use reqwest::Response;

@@ -1,5 +1,5 @@
 use crate::api_core::common::ServiceIdentifier;
-use crate::api_core::Endpoint;
+use crate::api_core::endpoints::Endpoint;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, Deserialize)]

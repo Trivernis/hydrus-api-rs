@@ -1,5 +1,5 @@
 use super::super::common;
-use hydrus_api::api_core::managing_cookies_and_http_headers::CookieBuilder;
+use hydrus_api::api_core::endpoints::managing_cookies_and_http_headers::CookieBuilder;
 
 #[tokio::test]
 async fn it_returns_cookies_for_a_domain() {

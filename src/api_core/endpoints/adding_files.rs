@@ -1,5 +1,5 @@
 use crate::api_core::common::{BasicHashList, ServiceIdentifier};
-use crate::api_core::Endpoint;
+use crate::api_core::endpoints::Endpoint;
 use serde::Serialize;
 
 pub static STATUS_IMPORT_SUCCESS: u8 = 1;

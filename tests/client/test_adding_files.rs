@@ -1,7 +1,7 @@
 use crate::common;
 use crate::common::create_testdata;
 use crate::common::test_data::get_test_hashes;
-use hydrus_api::api_core::adding_files::DeleteFilesRequest;
+use hydrus_api::api_core::endpoints::adding_files::DeleteFilesRequest;
 use hydrus_api::wrapper::service::ServiceName;
 
 #[tokio::test]
