@@ -1,4 +1,5 @@
 use crate::api_core::common::{FileIdentifier, PageInformation};
+use crate::api_core::endpoints::searching_and_fetching_files::Identifiers;
 use crate::error::Result;
 use crate::utils::split_file_identifiers_into_hashes_and_ids;
 use crate::Client;
@@ -56,7 +57,7 @@ impl HydrusPage {
         for id in ids {
             let metadata = self
                 .client
-                .get_file_metadata_by_identifier(FileIdentifier::ID(id))
+                .get_file_metadata_by_identifier::<Identifiers>(FileIdentifier::ID(id))
                 .await?;
             hashes.push(metadata.hash);
         }

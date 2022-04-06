@@ -2,7 +2,7 @@ use super::super::common;
 use hydrus_api::api_core::common::FileIdentifier;
 use hydrus_api::api_core::endpoints::searching_and_fetching_files::file_sort_type::SORT_FILE_PIXEL_COUNT;
 use hydrus_api::api_core::endpoints::searching_and_fetching_files::{
-    FileSearchOptions, SearchQueryEntry,
+    BasicMetadata, FileSearchOptions, FullMetadata, Identifiers, SearchQueryEntry,
 };
 
 #[tokio::test]
@@ -47,7 +47,7 @@ async fn is_searches_file_hashes() {
 async fn it_fetches_file_metadata() {
     let client = common::get_client();
     client
-        .get_file_metadata(
+        .get_file_metadata::<FullMetadata>(
             vec![],
             vec!["0000000000000000000000000000000000000000000000000000000000000000".to_string()],
         )
@@ -58,8 +58,18 @@ async fn it_fetches_file_metadata() {
 #[tokio::test]
 async fn it_fetches_file_metadata_by_id() {
     let client = common::get_client();
-    let response = client.get_file_metadata(vec![1], vec![]).await;
-    assert!(response.is_ok()); // Even if the file doesn't exist it still returns some information about it
+    let response = client
+        .get_file_metadata::<Identifiers>(vec![1], vec![])
+        .await;
+    assert!(response.is_ok());
+    let response = client
+        .get_file_metadata::<BasicMetadata>(vec![1], vec![])
+        .await;
+    assert!(response.is_ok());
+    let response = client
+        .get_file_metadata::<FullMetadata>(vec![1], vec![])
+        .await;
+    assert!(response.is_ok());
 }
 
 #[tokio::test]

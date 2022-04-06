@@ -1,4 +1,5 @@
 use crate::api_core::common::FileIdentifier;
+use crate::api_core::endpoints::searching_and_fetching_files::FullMetadata;
 use crate::error::Result;
 use crate::wrapper::address::Address;
 use crate::wrapper::builders::delete_files_builder::DeleteFilesBuilder;
@@ -72,7 +73,7 @@ impl Hydrus {
     pub async fn file(&self, identifier: FileIdentifier) -> Result<HydrusFile> {
         let metadata = self
             .client
-            .get_file_metadata_by_identifier(identifier)
+            .get_file_metadata_by_identifier::<FullMetadata>(identifier)
             .await?;
 
         Ok(HydrusFile::from_metadata(self.client.clone(), metadata))

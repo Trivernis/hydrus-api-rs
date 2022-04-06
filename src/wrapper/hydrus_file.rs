@@ -1,8 +1,8 @@
 use crate::api_core::common::{
-    FileIdentifier, FileMetadataInfo, FileRecord, FileSelection, FileServiceSelection,
-    ServiceIdentifier,
+    FileIdentifier, FileRecord, FileSelection, FileServiceSelection, ServiceIdentifier,
 };
 use crate::api_core::endpoints::adding_tags::{AddTagsRequestBuilder, TagAction};
+use crate::api_core::endpoints::searching_and_fetching_files::{FileFullMetadata, FullMetadata};
 use crate::error::{Error, Result};
 use crate::utils::tag_list_to_string_list;
 use crate::wrapper::builders::delete_files_builder::DeleteFilesBuilder;
@@ -39,7 +39,7 @@ pub struct HydrusFile {
     pub(crate) client: Client,
     pub id: FileIdentifier,
     pub status: FileStatus,
-    pub(crate) metadata: Option<FileMetadataInfo>,
+    pub(crate) metadata: Option<FileFullMetadata>,
 }
 
 impl HydrusFile {
@@ -65,7 +65,7 @@ impl HydrusFile {
         }
     }
 
-    pub(crate) fn from_metadata(client: Client, metadata: FileMetadataInfo) -> Self {
+    pub(crate) fn from_metadata(client: Client, metadata: FileFullMetadata) -> Self {
         let status = if metadata.is_trashed {
             FileStatus::Deleted
         } else {
@@ -74,7 +74,7 @@ impl HydrusFile {
 
         Self {
             client,
-            id: FileIdentifier::Hash(metadata.hash.clone()),
+            id: FileIdentifier::Hash(metadata.basic_metadata.identifiers.hash.clone()),
             status,
             metadata: Some(metadata),
         }
@@ -93,7 +93,7 @@ impl HydrusFile {
         match &self.id {
             FileIdentifier::ID(_) => {
                 let metadata = self.metadata().await?;
-                Ok(metadata.hash.clone())
+                Ok(metadata.basic_metadata.identifiers.hash.clone())
             }
             FileIdentifier::Hash(hash) => Ok(hash.clone()),
         }
@@ -103,17 +103,18 @@ impl HydrusFile {
     pub async fn size(&mut self) -> Result<Option<u64>> {
         let metadata = self.metadata().await?;
 
-        Ok(metadata.size.clone())
+        Ok(metadata.basic_metadata.size.clone())
     }
 
     /// Returns the mime of the file
     pub async fn mime(&mut self) -> Result<Mime> {
         let metadata = self.metadata().await?;
         let mime = metadata
+            .basic_metadata
             .mime
             .as_str()
             .parse()
-            .map_err(|_| Error::InvalidMime(metadata.mime.clone()))?;
+            .map_err(|_| Error::InvalidMime(metadata.basic_metadata.mime.clone()))?;
 
         Ok(mime)
     }
@@ -122,13 +123,16 @@ impl HydrusFile {
     pub async fn ext(&mut self) -> Result<String> {
         let metadata = self.metadata().await?;
 
-        Ok(metadata.ext.clone())
+        Ok(metadata.basic_metadata.ext.clone())
     }
 
     /// Returns the dimensions of the file in pixels
     pub async fn dimensions(&mut self) -> Result<Option<(u32, u32)>> {
         let metadata = self.metadata().await?;
-        if let (Some(width), Some(height)) = (&metadata.width, &metadata.height) {
+        if let (Some(width), Some(height)) = (
+            &metadata.basic_metadata.width,
+            &metadata.basic_metadata.height,
+        ) {
             Ok(Some((*width, *height)))
         } else {
             Ok(None)
@@ -139,21 +143,21 @@ impl HydrusFile {
     pub async fn duration(&mut self) -> Result<Option<u64>> {
         let metadata = self.metadata().await?;
 
-        Ok(metadata.duration.clone())
+        Ok(metadata.basic_metadata.duration.clone())
     }
 
     /// Returns the number of frames of the file if it's a video
     pub async fn num_frames(&mut self) -> Result<Option<u64>> {
         let metadata = self.metadata().await?;
 
-        Ok(metadata.num_frames.clone())
+        Ok(metadata.basic_metadata.num_frames.clone())
     }
 
     /// Returns if the file has audio
     pub async fn has_audio(&mut self) -> Result<bool> {
         let metadata = self.metadata().await?;
 
-        Ok(metadata.has_audio.unwrap_or(false))
+        Ok(metadata.basic_metadata.has_audio.unwrap_or(false))
     }
 
     /// Returns if the file is currently in the inbox
@@ -188,6 +192,7 @@ impl HydrusFile {
     pub async fn time_modified(&mut self) -> Result<Option<NaiveDateTime>> {
         let metadata = self.metadata().await?;
         let naive_time_modified = metadata
+            .basic_metadata
             .time_modified
             .map(|m| Utc.timestamp_millis(m as i64).naive_utc());
 
@@ -201,12 +206,14 @@ impl HydrusFile {
     ) -> Result<Option<NaiveDateTime>> {
         let metadata = self.metadata().await?;
         let naive_time_imported = metadata
+            .basic_metadata
             .file_services
             .current
             .get(service_key.as_ref())
             .map(|s| s.time_imported)
             .or_else(|| {
                 metadata
+                    .basic_metadata
                     .file_services
                     .deleted
                     .get(service_key.as_ref())
@@ -224,6 +231,7 @@ impl HydrusFile {
     ) -> Result<Option<NaiveDateTime>> {
         let metadata = self.metadata().await?;
         let naive_time_deleted = metadata
+            .basic_metadata
             .file_services
             .deleted
             .get(service_key.as_ref())
@@ -386,11 +394,11 @@ impl HydrusFile {
 
     /// Returns the metadata for the given file
     /// if there's already known metadata about the file it uses that
-    async fn metadata(&mut self) -> Result<&FileMetadataInfo> {
+    async fn metadata(&mut self) -> Result<&FileFullMetadata> {
         if self.metadata.is_none() {
             let metadata = self
                 .client
-                .get_file_metadata_by_identifier(self.id.clone())
+                .get_file_metadata_by_identifier::<FullMetadata>(self.id.clone())
                 .await?;
             self.status = if metadata.is_trashed {
                 FileStatus::Deleted

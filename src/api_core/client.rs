@@ -1,6 +1,5 @@
 use crate::api_core::common::{
-    FileIdentifier, FileMetadataInfo, FileRecord, FileSelection, FileServiceSelection,
-    OptionalStringNumber,
+    FileIdentifier, FileRecord, FileSelection, FileServiceSelection, OptionalStringNumber,
 };
 use crate::api_core::endpoints::access_management::{
     ApiVersion, ApiVersionResponse, GetServices, GetServicesResponse, SessionKey,
@@ -30,8 +29,8 @@ use crate::api_core::endpoints::managing_pages::{
     GetPages, GetPagesResponse,
 };
 use crate::api_core::endpoints::searching_and_fetching_files::{
-    FileMetadata, FileMetadataResponse, FileSearchOptions, GetFile, SearchFileHashes,
-    SearchFileHashesResponse, SearchFiles, SearchFilesResponse, SearchQueryEntry,
+    FileMetadata, FileMetadataResponse, FileMetadataType, FileSearchOptions, GetFile,
+    SearchFileHashes, SearchFileHashesResponse, SearchFiles, SearchFilesResponse, SearchQueryEntry,
 };
 use crate::api_core::endpoints::Endpoint;
 use crate::error::{Error, Result};
@@ -224,29 +223,40 @@ impl Client {
 
     /// Returns the metadata for a given list of file_ids or hashes
     #[tracing::instrument(skip(self), level = "debug")]
-    pub async fn get_file_metadata(
+    pub async fn get_file_metadata<M: FileMetadataType>(
         &self,
         file_ids: Vec<u64>,
         hashes: Vec<String>,
-    ) -> Result<FileMetadataResponse> {
-        let query = if file_ids.len() > 0 {
+    ) -> Result<FileMetadataResponse<M>> {
+        let id_query = if file_ids.len() > 0 {
             ("file_ids", Self::serialize_query_object(file_ids)?)
         } else {
             ("hashes", Self::serialize_query_object(hashes)?)
         };
-        self.get_and_parse::<FileMetadata, [(&str, String)]>(&[query])
+        let query = [
+            id_query,
+            (
+                "only_return_identifiers",
+                Self::serialize_query_object(M::only_identifiers())?,
+            ),
+            (
+                "only_return_basic_information",
+                Self::serialize_query_object(M::only_basic_information())?,
+            ),
+        ];
+        self.get_and_parse::<FileMetadata<M>, [(&str, String)]>(&query)
             .await
     }
 
     /// Returns the metadata for a single file identifier
     #[tracing::instrument(skip(self), level = "debug")]
-    pub async fn get_file_metadata_by_identifier(
+    pub async fn get_file_metadata_by_identifier<M: FileMetadataType>(
         &self,
         id: FileIdentifier,
-    ) -> Result<FileMetadataInfo> {
+    ) -> Result<M::Response> {
         let mut response = match id.clone() {
-            FileIdentifier::ID(id) => self.get_file_metadata(vec![id], vec![]).await?,
-            FileIdentifier::Hash(hash) => self.get_file_metadata(vec![], vec![hash]).await?,
+            FileIdentifier::ID(id) => self.get_file_metadata::<M>(vec![id], vec![]).await?,
+            FileIdentifier::Hash(hash) => self.get_file_metadata::<M>(vec![], vec![hash]).await?,
         };
 
         response

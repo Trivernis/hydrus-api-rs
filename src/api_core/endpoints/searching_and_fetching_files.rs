@@ -1,5 +1,10 @@
-use crate::api_core::common::FileMetadataInfo;
+use crate::api_core::common::FileMetadataServices;
 use crate::api_core::endpoints::Endpoint;
+use serde::de::DeserializeOwned;
+use serde::Deserialize;
+use std::collections::HashMap;
+use std::fmt::Debug;
+use std::marker::PhantomData;
 
 pub mod file_sort_type {
     pub const SORT_FILE_SIZE: u8 = 0;
@@ -129,15 +134,15 @@ impl Endpoint for SearchFileHashes {
 }
 
 #[derive(Clone, Debug, Default, Deserialize)]
-pub struct FileMetadataResponse {
-    pub metadata: Vec<FileMetadataInfo>,
+pub struct FileMetadataResponse<M: FileMetadataType> {
+    pub metadata: Vec<M::Response>,
 }
 
-pub struct FileMetadata;
+pub struct FileMetadata<M: FileMetadataType>(PhantomData<M>);
 
-impl Endpoint for FileMetadata {
+impl<M: FileMetadataType> Endpoint for FileMetadata<M> {
     type Request = ();
-    type Response = FileMetadataResponse;
+    type Response = FileMetadataResponse<M>;
 
     fn path() -> String {
         String::from("get_files/file_metadata")
@@ -167,5 +172,96 @@ where
 {
     fn from(s: S) -> Self {
         Self::Tag(s.to_string())
+    }
+}
+
+#[derive(Clone, Debug, Default, Deserialize)]
+pub struct FileMetadataIdentifiers {
+    pub file_id: u64,
+    pub hash: String,
+}
+
+#[derive(Clone, Debug, Default, Deserialize)]
+pub struct FileBasicMetadata {
+    #[serde(flatten)]
+    pub identifiers: FileMetadataIdentifiers,
+    pub size: Option<u64>,
+    pub mime: String,
+    pub ext: String,
+    pub width: Option<u32>,
+    pub height: Option<u32>,
+    pub duration: Option<u64>,
+    pub time_modified: Option<u64>,
+    pub file_services: FileMetadataServices,
+    pub has_audio: Option<bool>,
+    pub num_frames: Option<u64>,
+    pub num_words: Option<u64>,
+}
+
+#[derive(Clone, Debug, Default, Deserialize)]
+pub struct FileFullMetadata {
+    #[serde(flatten)]
+    pub basic_metadata: FileBasicMetadata,
+    pub is_inbox: bool,
+    pub is_local: bool,
+    pub is_trashed: bool,
+    pub known_urls: Vec<String>,
+    #[deprecated]
+    pub service_names_to_statuses_to_tags: HashMap<String, HashMap<String, Vec<String>>>,
+    pub service_keys_to_statuses_to_tags: HashMap<String, HashMap<String, Vec<String>>>,
+    #[deprecated]
+    pub service_names_to_statuses_to_display_tags: HashMap<String, HashMap<String, Vec<String>>>,
+    pub service_keys_to_statuses_to_display_tags: HashMap<String, HashMap<String, Vec<String>>>,
+}
+
+pub trait FileMetadataType: Clone + Debug {
+    type Response: DeserializeOwned + Clone + Debug;
+
+    fn only_identifiers() -> bool;
+    fn only_basic_information() -> bool;
+}
+
+#[derive(Clone, Debug)]
+pub struct FullMetadata;
+
+impl FileMetadataType for FullMetadata {
+    type Response = FileFullMetadata;
+
+    fn only_identifiers() -> bool {
+        false
+    }
+
+    fn only_basic_information() -> bool {
+        false
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct BasicMetadata;
+
+impl FileMetadataType for BasicMetadata {
+    type Response = FileBasicMetadata;
+
+    fn only_identifiers() -> bool {
+        false
+    }
+
+    fn only_basic_information() -> bool {
+        true
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct Identifiers;
+
+impl FileMetadataType for Identifiers {
+    type Response = FileMetadataIdentifiers;
+
+    fn only_identifiers() -> bool {
+        true
+    }
+
+    fn only_basic_information() -> bool {
+        false
     }
 }
