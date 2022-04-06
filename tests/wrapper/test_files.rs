@@ -117,9 +117,8 @@ async fn it_deletes() {
     let mut file = get_file().await;
     file.delete()
         .reason("I just don't like that file")
-        .service(ServiceName::all_local_files().into())
         .run()
         .await
         .unwrap();
-    file.undelete().await.unwrap();
+    file.undelete(ServiceName::my_files().into()).await.unwrap();
 }

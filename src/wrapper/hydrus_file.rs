@@ -239,12 +239,32 @@ impl HydrusFile {
         DeleteFilesBuilder::new(self.client.clone()).add_file(self.id.clone())
     }
 
-    /// Undeletes the file
-    pub async fn undelete(&mut self) -> Result<()> {
+    /// Undeletes the file for the given service or all services
+    /// if `FileServiceSelection::none` is passed
+    pub async fn undelete(&mut self, service_selection: FileServiceSelection) -> Result<()> {
         let hash = self.hash().await?;
         self.metadata = None;
         self.client
-            .undelete_files(FileSelection::by_hash(hash), FileServiceSelection::none())
+            .undelete_files(FileSelection::by_hash(hash), service_selection)
+            .await
+    }
+
+    /// Archives the file in all passed file services or all configured services
+    /// if no selection is passed
+    pub async fn archive(&mut self, service_selection: FileServiceSelection) -> Result<()> {
+        let hash = self.hash().await?;
+        self.metadata = None;
+        self.client
+            .archive_files(FileSelection::by_hash(hash), service_selection)
+            .await
+    }
+
+    /// Unarchives the file for the given services
+    pub async fn unarchive(&mut self, service_selection: FileServiceSelection) -> Result<()> {
+        let hash = self.hash().await?;
+        self.metadata = None;
+        self.client
+            .unarchive_files(FileSelection::by_hash(hash), service_selection)
             .await
     }
 
