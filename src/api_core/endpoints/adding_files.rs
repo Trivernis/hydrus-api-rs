@@ -1,5 +1,6 @@
-use crate::api_core::common::BasicHashList;
-use crate::api_core::Endpoint;
+use crate::api_core::common::{FileSelection, FileServiceSelection};
+use crate::api_core::endpoints::Endpoint;
+use serde::Serialize;
 
 pub static STATUS_IMPORT_SUCCESS: u8 = 1;
 pub static STATUS_IMPORT_ALREADY_EXISTS: u8 = 2;
@@ -30,7 +31,14 @@ impl Endpoint for AddFile {
     }
 }
 
-pub type DeleteFilesRequest = BasicHashList;
+#[derive(Clone, Debug, Serialize)]
+pub struct DeleteFilesRequest {
+    #[serde(flatten)]
+    pub file_selection: FileSelection,
+    #[serde(flatten)]
+    pub service_selection: FileServiceSelection,
+    pub reason: Option<String>,
+}
 
 pub struct DeleteFiles;
 
@@ -43,7 +51,14 @@ impl Endpoint for DeleteFiles {
     }
 }
 
-pub type UndeleteFilesRequest = BasicHashList;
+#[derive(Clone, Debug, Serialize)]
+pub struct UndeleteFilesRequest {
+    #[serde(flatten)]
+    pub file_selection: FileSelection,
+    #[serde(flatten)]
+    pub service_selection: FileServiceSelection,
+}
+
 pub struct UndeleteFiles;
 
 impl Endpoint for UndeleteFiles {
@@ -55,7 +70,14 @@ impl Endpoint for UndeleteFiles {
     }
 }
 
-pub type ArchiveFilesRequest = BasicHashList;
+#[derive(Clone, Debug, Serialize)]
+pub struct ArchiveFilesRequest {
+    #[serde(flatten)]
+    pub file_selection: FileSelection,
+    #[serde(flatten)]
+    pub service_selection: FileServiceSelection,
+}
+
 pub struct ArchiveFiles;
 
 impl Endpoint for ArchiveFiles {
@@ -67,11 +89,18 @@ impl Endpoint for ArchiveFiles {
     }
 }
 
-pub type UnarchiveFilesRequest = BasicHashList;
+#[derive(Clone, Debug, Serialize)]
+pub struct UnarchiveFilesRequest {
+    #[serde(flatten)]
+    pub file_selection: FileSelection,
+    #[serde(flatten)]
+    pub service_selection: FileServiceSelection,
+}
+
 pub struct UnarchiveFiles;
 
 impl Endpoint for UnarchiveFiles {
-    type Request = UndeleteFilesRequest;
+    type Request = UnarchiveFilesRequest;
     type Response = ();
 
     fn path() -> String {

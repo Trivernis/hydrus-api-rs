@@ -1,14 +1,18 @@
 use super::super::common;
-use hydrus_api::api_core::adding_tags::TagAction;
+use crate::common::test_data::TEST_HASH_2;
+use crate::common::{create_testdata, get_client};
 use hydrus_api::api_core::common::FileIdentifier;
+use hydrus_api::api_core::endpoints::adding_tags::TagAction;
 use hydrus_api::wrapper::hydrus_file::HydrusFile;
 use hydrus_api::wrapper::service::ServiceName;
 
 async fn get_file() -> HydrusFile {
+    let client = get_client();
+    create_testdata(&client).await;
     let hydrus = common::get_hydrus();
     hydrus
         .file(FileIdentifier::hash(
-            "277a138cd1ee79fc1fdb2869c321b848d4861e45b82184487139ef66dd40b62d", // needs to exist
+            TEST_HASH_2, // needs to exist
         ))
         .await
         .unwrap()
@@ -102,9 +106,19 @@ async fn it_retrieves_content() {
 async fn it_retrieves_metadata() {
     let mut file = get_file().await;
     assert!(file.dimensions().await.unwrap().is_some());
-    assert!(file.stored_locally().await.unwrap());
     assert!(file.duration().await.unwrap().is_none());
     assert!(file.time_modified().await.is_ok());
     assert!(file.time_deleted("000").await.is_ok());
     assert!(file.time_imported("000").await.is_ok());
+}
+
+#[tokio::test]
+async fn it_deletes() {
+    let mut file = get_file().await;
+    file.delete()
+        .reason("I just don't like that file")
+        .run()
+        .await
+        .unwrap();
+    file.undelete(ServiceName::my_files().into()).await.unwrap();
 }

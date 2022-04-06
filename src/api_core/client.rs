@@ -1,32 +1,38 @@
-use crate::api_core::access_management::{
+use crate::api_core::common::{
+    FileIdentifier, FileRecord, FileSelection, FileServiceSelection, OptionalStringNumber,
+};
+use crate::api_core::endpoints::access_management::{
     ApiVersion, ApiVersionResponse, GetServices, GetServicesResponse, SessionKey,
     SessionKeyResponse, VerifyAccessKey, VerifyAccessKeyResponse,
 };
-use crate::api_core::adding_files::{
+use crate::api_core::endpoints::adding_files::{
     AddFile, AddFileRequest, AddFileResponse, ArchiveFiles, ArchiveFilesRequest, DeleteFiles,
     DeleteFilesRequest, UnarchiveFiles, UnarchiveFilesRequest, UndeleteFiles, UndeleteFilesRequest,
 };
-use crate::api_core::adding_notes::{DeleteNotes, DeleteNotesRequest, SetNotes, SetNotesRequest};
-use crate::api_core::adding_tags::{AddTags, AddTagsRequest, CleanTags, CleanTagsResponse};
-use crate::api_core::adding_urls::{
+use crate::api_core::endpoints::adding_notes::{
+    DeleteNotes, DeleteNotesRequest, SetNotes, SetNotesRequest,
+};
+use crate::api_core::endpoints::adding_tags::{
+    AddTags, AddTagsRequest, CleanTags, CleanTagsResponse,
+};
+use crate::api_core::endpoints::adding_urls::{
     AddUrl, AddUrlRequest, AddUrlResponse, AssociateUrl, AssociateUrlRequest, GetUrlFiles,
     GetUrlFilesResponse, GetUrlInfo, GetUrlInfoResponse,
 };
-use crate::api_core::client_builder::ClientBuilder;
-use crate::api_core::common::{FileIdentifier, FileMetadataInfo, FileRecord, OptionalStringNumber};
-use crate::api_core::managing_cookies_and_http_headers::{
+use crate::api_core::endpoints::client_builder::ClientBuilder;
+use crate::api_core::endpoints::managing_cookies_and_http_headers::{
     GetCookies, GetCookiesResponse, SetCookies, SetCookiesRequest, SetUserAgent,
     SetUserAgentRequest,
 };
-use crate::api_core::managing_pages::{
+use crate::api_core::endpoints::managing_pages::{
     AddFiles, AddFilesRequest, FocusPage, FocusPageRequest, GetPageInfo, GetPageInfoResponse,
     GetPages, GetPagesResponse,
 };
-use crate::api_core::searching_and_fetching_files::{
-    FileMetadata, FileMetadataResponse, FileSearchOptions, GetFile, SearchFileHashes,
-    SearchFileHashesResponse, SearchFiles, SearchFilesResponse, SearchQueryEntry,
+use crate::api_core::endpoints::searching_and_fetching_files::{
+    FileMetadata, FileMetadataResponse, FileMetadataType, FileSearchOptions, GetFile,
+    SearchFileHashes, SearchFileHashesResponse, SearchFiles, SearchFilesResponse, SearchQueryEntry,
 };
-use crate::api_core::Endpoint;
+use crate::api_core::endpoints::Endpoint;
 use crate::error::{Error, Result};
 use bytes::Buf;
 use reqwest::Response;
@@ -106,36 +112,66 @@ impl Client {
 
     /// Moves files with matching hashes to the trash
     #[tracing::instrument(skip(self), level = "debug")]
-    pub async fn delete_files(&self, hashes: Vec<String>) -> Result<()> {
-        self.post::<DeleteFiles>(DeleteFilesRequest { hashes })
-            .await?;
+    pub async fn delete_files(
+        &self,
+        files: FileSelection,
+        service: FileServiceSelection,
+        reason: Option<String>,
+    ) -> Result<()> {
+        self.post::<DeleteFiles>(DeleteFilesRequest {
+            file_selection: files,
+            service_selection: service,
+            reason,
+        })
+        .await?;
 
         Ok(())
     }
 
     /// Pulls files out of the trash by hash
     #[tracing::instrument(skip(self), level = "debug")]
-    pub async fn undelete_files(&self, hashes: Vec<String>) -> Result<()> {
-        self.post::<UndeleteFiles>(UndeleteFilesRequest { hashes })
-            .await?;
+    pub async fn undelete_files(
+        &self,
+        files: FileSelection,
+        service: FileServiceSelection,
+    ) -> Result<()> {
+        self.post::<UndeleteFiles>(UndeleteFilesRequest {
+            file_selection: files,
+            service_selection: service,
+        })
+        .await?;
 
         Ok(())
     }
 
     /// Moves files from the inbox into the archive
     #[tracing::instrument(skip(self), level = "debug")]
-    pub async fn archive_files(&self, hashes: Vec<String>) -> Result<()> {
-        self.post::<ArchiveFiles>(ArchiveFilesRequest { hashes })
-            .await?;
+    pub async fn archive_files(
+        &self,
+        files: FileSelection,
+        service: FileServiceSelection,
+    ) -> Result<()> {
+        self.post::<ArchiveFiles>(ArchiveFilesRequest {
+            file_selection: files,
+            service_selection: service,
+        })
+        .await?;
 
         Ok(())
     }
 
     /// Moves files from the archive into the inbox
     #[tracing::instrument(skip(self), level = "debug")]
-    pub async fn unarchive_files(&self, hashes: Vec<String>) -> Result<()> {
-        self.post::<UnarchiveFiles>(UnarchiveFilesRequest { hashes })
-            .await?;
+    pub async fn unarchive_files(
+        &self,
+        files: FileSelection,
+        service: FileServiceSelection,
+    ) -> Result<()> {
+        self.post::<UnarchiveFiles>(UnarchiveFilesRequest {
+            file_selection: files,
+            service_selection: service,
+        })
+        .await?;
 
         Ok(())
     }
@@ -180,36 +216,47 @@ impl Client {
     ) -> Result<SearchFileHashesResponse> {
         let mut args = options.into_query_args();
         args.push(("tags", Self::serialize_query_object(query)?));
-        args.push(("return_hashes", String::from("true")));
+        args.push(("return_hashes", Self::serialize_query_object(true)?));
         self.get_and_parse::<SearchFileHashes, [(&str, String)]>(&args)
             .await
     }
 
     /// Returns the metadata for a given list of file_ids or hashes
     #[tracing::instrument(skip(self), level = "debug")]
-    pub async fn get_file_metadata(
+    pub async fn get_file_metadata<M: FileMetadataType>(
         &self,
         file_ids: Vec<u64>,
         hashes: Vec<String>,
-    ) -> Result<FileMetadataResponse> {
-        let query = if file_ids.len() > 0 {
+    ) -> Result<FileMetadataResponse<M>> {
+        let id_query = if file_ids.len() > 0 {
             ("file_ids", Self::serialize_query_object(file_ids)?)
         } else {
             ("hashes", Self::serialize_query_object(hashes)?)
         };
-        self.get_and_parse::<FileMetadata, [(&str, String)]>(&[query])
+        let query = [
+            id_query,
+            (
+                "only_return_identifiers",
+                Self::serialize_query_object(M::only_identifiers())?,
+            ),
+            (
+                "only_return_basic_information",
+                Self::serialize_query_object(M::only_basic_information())?,
+            ),
+        ];
+        self.get_and_parse::<FileMetadata<M>, [(&str, String)]>(&query)
             .await
     }
 
     /// Returns the metadata for a single file identifier
     #[tracing::instrument(skip(self), level = "debug")]
-    pub async fn get_file_metadata_by_identifier(
+    pub async fn get_file_metadata_by_identifier<M: FileMetadataType>(
         &self,
         id: FileIdentifier,
-    ) -> Result<FileMetadataInfo> {
+    ) -> Result<M::Response> {
         let mut response = match id.clone() {
-            FileIdentifier::ID(id) => self.get_file_metadata(vec![id], vec![]).await?,
-            FileIdentifier::Hash(hash) => self.get_file_metadata(vec![], vec![hash]).await?,
+            FileIdentifier::ID(id) => self.get_file_metadata::<M>(vec![id], vec![]).await?,
+            FileIdentifier::Hash(hash) => self.get_file_metadata::<M>(vec![], vec![hash]).await?,
         };
 
         response
@@ -432,11 +479,13 @@ impl Client {
     fn serialize_query_object<S: Serialize>(obj: S) -> Result<String> {
         #[cfg(feature = "json")]
         {
+            tracing::trace!("Serializing query to JSON");
             serde_json::ser::to_string(&obj).map_err(|e| Error::Serialization(e.to_string()))
         }
 
         #[cfg(feature = "cbor")]
         {
+            tracing::trace!("Serializing query to CBOR");
             let mut buf = Vec::new();
             ciborium::ser::into_writer(&obj, &mut buf)
                 .map_err(|e| Error::Serialization(e.to_string()))?;
@@ -471,11 +520,19 @@ impl Client {
     #[tracing::instrument(skip(body), level = "trace")]
     fn serialize_body<S: Serialize>(body: S) -> Result<Vec<u8>> {
         let mut buf = Vec::new();
-        #[cfg(feature = "cbor")]
-        ciborium::ser::into_writer(&body, &mut buf)
-            .map_err(|e| Error::Serialization(e.to_string()))?;
+
         #[cfg(feature = "json")]
-        serde_json::to_writer(&mut buf, &body).map_err(|e| Error::Serialization(e.to_string()))?;
+        {
+            tracing::trace!("Serializing body to JSON");
+            serde_json::to_writer(&mut buf, &body)
+                .map_err(|e| Error::Serialization(e.to_string()))?;
+        }
+        #[cfg(feature = "cbor")]
+        {
+            tracing::trace!("Serializing body to CBOR");
+            ciborium::ser::into_writer(&body, &mut buf)
+                .map_err(|e| Error::Serialization(e.to_string()))?;
+        }
 
         Ok(buf)
     }
@@ -525,11 +582,16 @@ impl Client {
         let bytes = response.bytes().await?;
         let reader = bytes.reader();
         #[cfg(feature = "json")]
-        let content = serde_json::from_reader::<_, T>(reader)
-            .map_err(|e| Error::Deserialization(e.to_string()))?;
+        let content = {
+            tracing::trace!("Deserializing content from JSON");
+            serde_json::from_reader::<_, T>(reader)
+                .map_err(|e| Error::Deserialization(e.to_string()))?
+        };
         #[cfg(feature = "cbor")]
-        let content =
-            ciborium::de::from_reader(reader).map_err(|e| Error::Deserialization(e.to_string()))?;
+        let content = {
+            tracing::trace!("Deserializing content from CBOR");
+            ciborium::de::from_reader(reader).map_err(|e| Error::Deserialization(e.to_string()))?
+        };
         tracing::trace!("response content: {:?}", content);
 
         Ok(content)

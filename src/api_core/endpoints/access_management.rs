@@ -1,5 +1,5 @@
 use crate::api_core::common::BasicServiceInfo;
-use crate::api_core::Endpoint;
+use crate::api_core::endpoints::Endpoint;
 use std::collections::HashMap;
 
 pub static SERVICE_TYPE_LOCAL_TAGS: &str = "local_tags";

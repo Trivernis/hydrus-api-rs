@@ -1,7 +1,7 @@
 use super::super::common;
 use crate::common::test_data::{get_test_hashes, get_test_urls, TEST_URL_1};
-use hydrus_api::api_core::adding_urls::{AddUrlRequestBuilder, URL_TYPE_POST};
 use hydrus_api::api_core::common::ServiceIdentifier;
+use hydrus_api::api_core::endpoints::adding_urls::{AddUrlRequestBuilder, URL_TYPE_POST};
 
 #[tokio::test]
 async fn it_returns_files_for_an_url() {

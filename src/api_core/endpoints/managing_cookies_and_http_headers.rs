@@ -1,5 +1,5 @@
 use crate::api_core::common::OptionalStringNumber;
-use crate::api_core::Endpoint;
+use crate::api_core::endpoints::Endpoint;
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct GetCookiesResponse {

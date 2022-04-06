@@ -1,5 +1,5 @@
-use crate::api_core::adding_tags::{AddTagsRequestBuilder, TagAction};
 use crate::api_core::common::ServiceIdentifier;
+use crate::api_core::endpoints::adding_tags::{AddTagsRequestBuilder, TagAction};
 use crate::error::Result;
 use crate::wrapper::tag::Tag;
 use crate::Client;

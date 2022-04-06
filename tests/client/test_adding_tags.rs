@@ -1,7 +1,7 @@
 use super::super::common;
 use crate::common::test_data::EMPTY_HASH;
-use hydrus_api::api_core::adding_tags::{AddTagsRequestBuilder, TagAction};
 use hydrus_api::api_core::common::ServiceIdentifier;
+use hydrus_api::api_core::endpoints::adding_tags::{AddTagsRequestBuilder, TagAction};
 
 #[tokio::test]
 async fn it_cleans_tags() {

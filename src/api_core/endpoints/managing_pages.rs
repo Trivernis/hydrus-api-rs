@@ -1,5 +1,5 @@
 use crate::api_core::common::PageInformation;
-use crate::api_core::Endpoint;
+use crate::api_core::endpoints::Endpoint;
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct GetPagesResponse {

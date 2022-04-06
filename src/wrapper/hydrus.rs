@@ -1,6 +1,8 @@
 use crate::api_core::common::FileIdentifier;
+use crate::api_core::endpoints::searching_and_fetching_files::FullMetadata;
 use crate::error::Result;
 use crate::wrapper::address::Address;
+use crate::wrapper::builders::delete_files_builder::DeleteFilesBuilder;
 use crate::wrapper::builders::import_builder::ImportBuilder;
 use crate::wrapper::builders::search_builder::SearchBuilder;
 use crate::wrapper::builders::tagging_builder::TaggingBuilder;
@@ -71,10 +73,15 @@ impl Hydrus {
     pub async fn file(&self, identifier: FileIdentifier) -> Result<HydrusFile> {
         let metadata = self
             .client
-            .get_file_metadata_by_identifier(identifier)
+            .get_file_metadata_by_identifier::<FullMetadata>(identifier)
             .await?;
 
         Ok(HydrusFile::from_metadata(self.client.clone(), metadata))
+    }
+
+    /// Creates a builder to delete files
+    pub async fn delete(&self) -> DeleteFilesBuilder {
+        DeleteFilesBuilder::new(self.client.clone())
     }
 
     /// Starts a request to bulk add tags to files

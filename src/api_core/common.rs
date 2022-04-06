@@ -1,3 +1,5 @@
+use crate::wrapper::service::ServiceName;
+use serde::Serialize;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -43,33 +45,6 @@ pub struct BasicHashList {
     pub hashes: Vec<String>,
 }
 
-#[derive(Clone, Debug, Default, Deserialize)]
-pub struct FileMetadataInfo {
-    pub file_id: u64,
-    pub hash: String,
-    pub size: Option<u64>,
-    pub mime: String,
-    pub ext: String,
-    pub width: Option<u32>,
-    pub height: Option<u32>,
-    pub duration: Option<u64>,
-    pub time_modified: Option<u64>,
-    pub file_services: FileMetadataServices,
-    pub has_audio: Option<bool>,
-    pub num_frames: Option<u64>,
-    pub num_words: Option<u64>,
-    pub is_inbox: bool,
-    pub is_local: bool,
-    pub is_trashed: bool,
-    pub known_urls: Vec<String>,
-    #[deprecated]
-    pub service_names_to_statuses_to_tags: HashMap<String, HashMap<String, Vec<String>>>,
-    pub service_keys_to_statuses_to_tags: HashMap<String, HashMap<String, Vec<String>>>,
-    #[deprecated]
-    pub service_names_to_statuses_to_display_tags: HashMap<String, HashMap<String, Vec<String>>>,
-    pub service_keys_to_statuses_to_display_tags: HashMap<String, HashMap<String, Vec<String>>>,
-}
-
 #[derive(Clone, Debug)]
 pub enum FileIdentifier {
     ID(u64),
@@ -95,6 +70,119 @@ impl FileIdentifier {
         } else {
             None
         }
+    }
+}
+
+/// A generic selection for one or multiple files
+#[derive(Clone, Debug, Serialize, Default)]
+pub struct FileSelection {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) hash: Option<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub(crate) hashes: Vec<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) file_id: Option<u64>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub(crate) file_ids: Vec<u64>,
+}
+
+impl From<FileIdentifier> for FileSelection {
+    fn from(id: FileIdentifier) -> Self {
+        let mut selection = Self::default();
+        match id {
+            FileIdentifier::ID(id) => selection.file_id = Some(id),
+            FileIdentifier::Hash(hash) => selection.hash = Some(hash),
+        }
+        selection
+    }
+}
+
+impl FileSelection {
+    /// Creates a new single hash file selection
+    pub fn by_hash<S: ToString>(hash: S) -> Self {
+        Self {
+            hash: Some(hash.to_string()),
+            ..Default::default()
+        }
+    }
+
+    /// Creates a new file selection with a single file id
+    pub fn by_file_id(file_id: u64) -> Self {
+        Self {
+            file_id: Some(file_id),
+            ..Default::default()
+        }
+    }
+
+    /// Creates a new file selection with several hashes
+    pub fn by_hashes(mut hashes: Vec<String>) -> Self {
+        if hashes.len() == 1 {
+            Self::by_hash(hashes.pop().unwrap())
+        } else {
+            Self {
+                hashes,
+                ..Default::default()
+            }
+        }
+    }
+
+    /// Creates a new file selection with several IDs
+    pub fn by_file_ids(mut file_ids: Vec<u64>) -> Self {
+        if file_ids.len() == 1 {
+            Self::by_file_id(file_ids.pop().unwrap())
+        } else {
+            Self {
+                file_ids,
+                ..Default::default()
+            }
+        }
+    }
+}
+
+/// A selection for a single file  service
+#[derive(Clone, Debug, Serialize, Default)]
+pub struct FileServiceSelection {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) file_service_name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) file_service_key: Option<String>,
+}
+
+impl FileServiceSelection {
+    /// Creates a new file service selection by name
+    pub fn by_name<S: ToString>(name: S) -> Self {
+        Self {
+            file_service_name: Some(name.to_string()),
+            ..Default::default()
+        }
+    }
+
+    /// Creates a new file  service selection by service key
+    pub fn by_key<S: ToString>(key: S) -> Self {
+        Self {
+            file_service_key: Some(key.to_string()),
+            ..Default::default()
+        }
+    }
+
+    /// Selects no service
+    pub fn none() -> Self {
+        Self::default()
+    }
+}
+
+impl From<ServiceIdentifier> for FileServiceSelection {
+    fn from(id: ServiceIdentifier) -> Self {
+        match id {
+            ServiceIdentifier::Name(n) => Self::by_name(n),
+            ServiceIdentifier::Key(k) => Self::by_key(k),
+        }
+    }
+}
+
+impl From<ServiceName> for FileServiceSelection {
+    fn from(name: ServiceName) -> Self {
+        Self::by_name(name)
     }
 }
 

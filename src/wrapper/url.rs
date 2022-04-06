@@ -1,4 +1,4 @@
-use crate::api_core::adding_urls::{
+use crate::api_core::endpoints::adding_urls::{
     URL_TYPE_FILE, URL_TYPE_GALLERY, URL_TYPE_POST, URL_TYPE_WATCHABLE,
 };
 use crate::error::Result;

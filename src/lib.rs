@@ -56,7 +56,7 @@
 //! ## Client Usage Example
 //! ```
 //! use hydrus_api::Client;
-//! use hydrus_api::api_core::adding_tags::{AddTagsRequestBuilder, TagAction};
+//! use hydrus_api::api_core::endpoints::adding_tags::{AddTagsRequestBuilder, TagAction};
 //! use std::env;
 //! use hydrus_api::api_core::common::ServiceIdentifier;
 //! # #[tokio::test]

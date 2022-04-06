@@ -1,6 +1,8 @@
 use crate::common;
 use crate::common::create_testdata;
-use crate::common::test_data::get_test_hashes;
+use crate::common::test_data::{get_test_hashes, TEST_HASH_1};
+use hydrus_api::api_core::common::FileSelection;
+use hydrus_api::wrapper::service::ServiceName;
 
 #[tokio::test]
 async fn it_adds_files() {
@@ -22,26 +24,52 @@ async fn it_adds_binary_files() {
 #[tokio::test]
 async fn it_deletes_files() {
     let client = common::get_client();
-    client.delete_files(get_test_hashes()).await.unwrap();
+    create_testdata(&client).await;
+    client
+        .delete_files(
+            FileSelection::by_hashes(get_test_hashes()),
+            ServiceName::my_files().into(),
+            Some("Test".to_string()),
+        )
+        .await
+        .unwrap();
 }
 
 #[tokio::test]
 async fn it_undeletes_files() {
     let client = common::get_client();
     create_testdata(&client).await;
-    client.undelete_files(get_test_hashes()).await.unwrap();
+    client
+        .undelete_files(
+            FileSelection::by_hashes(get_test_hashes()),
+            ServiceName::my_files().into(),
+        )
+        .await
+        .unwrap();
 }
 
 #[tokio::test]
 async fn it_archives_files() {
     let client = common::get_client();
     create_testdata(&client).await;
-    client.archive_files(get_test_hashes()).await.unwrap();
+    client
+        .archive_files(
+            FileSelection::by_hashes(vec![TEST_HASH_1.to_string()]),
+            ServiceName::my_files().into(),
+        )
+        .await
+        .unwrap();
 }
 
 #[tokio::test]
 async fn it_unarchives_files() {
     let client = common::get_client();
     create_testdata(&client).await;
-    client.unarchive_files(get_test_hashes()).await.unwrap();
+    client
+        .unarchive_files(
+            FileSelection::by_hashes(get_test_hashes()),
+            ServiceName::my_files().into(),
+        )
+        .await
+        .unwrap();
 }

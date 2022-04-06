@@ -1,6 +1,6 @@
-use crate::api_core::adding_files::{STATUS_IMPORT_FAILED, STATUS_IMPORT_VETOED};
-use crate::api_core::adding_urls::AddUrlRequestBuilder;
 use crate::api_core::common::ServiceIdentifier;
+use crate::api_core::endpoints::adding_files::{STATUS_IMPORT_FAILED, STATUS_IMPORT_VETOED};
+use crate::api_core::endpoints::adding_urls::AddUrlRequestBuilder;
 use crate::error::{Error, Result};
 use crate::utils::tag_list_to_string_list;
 use crate::wrapper::hydrus_file::HydrusFile;
