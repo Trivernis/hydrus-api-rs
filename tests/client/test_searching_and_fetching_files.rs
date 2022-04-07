@@ -1,9 +1,12 @@
 use super::super::common;
+use crate::common::create_testdata;
 use hydrus_api::api_core::common::FileIdentifier;
 use hydrus_api::api_core::endpoints::searching_and_fetching_files::file_sort_type::SORT_FILE_PIXEL_COUNT;
 use hydrus_api::api_core::endpoints::searching_and_fetching_files::{
     BasicMetadata, FileSearchOptions, FullMetadata, Identifiers, SearchQueryEntry,
 };
+use hydrus_api::wrapper::builders::tag_builder::SystemTagBuilder;
+use hydrus_api::wrapper::service::ServiceName;
 
 #[tokio::test]
 async fn is_searches_files() {
@@ -58,18 +61,29 @@ async fn it_fetches_file_metadata() {
 #[tokio::test]
 async fn it_fetches_file_metadata_by_id() {
     let client = common::get_client();
+    create_testdata(&client).await;
+    let mut files = client
+        .search_files(
+            vec![SearchQueryEntry::Tag(
+                SystemTagBuilder::new().everything().build().to_string(),
+            )],
+            FileSearchOptions::default().file_service_name(ServiceName::my_files()),
+        )
+        .await
+        .unwrap();
+    let test_id = files.file_ids.pop().unwrap();
     let response = client
-        .get_file_metadata::<Identifiers>(vec![1], vec![])
+        .get_file_metadata::<Identifiers>(vec![test_id], vec![])
         .await;
-    assert!(response.is_ok());
+    response.unwrap();
     let response = client
-        .get_file_metadata::<BasicMetadata>(vec![1], vec![])
+        .get_file_metadata::<BasicMetadata>(vec![test_id], vec![])
         .await;
-    assert!(response.is_ok());
+    response.unwrap();
     let response = client
-        .get_file_metadata::<FullMetadata>(vec![1], vec![])
+        .get_file_metadata::<FullMetadata>(vec![test_id], vec![])
         .await;
-    assert!(response.is_ok());
+    response.unwrap();
 }
 
 #[tokio::test]

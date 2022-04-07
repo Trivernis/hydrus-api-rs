@@ -192,7 +192,6 @@ pub struct FileBasicMetadata {
     pub height: Option<u32>,
     pub duration: Option<u64>,
     pub time_modified: Option<u64>,
-    pub file_services: FileMetadataServices,
     pub has_audio: Option<bool>,
     pub num_frames: Option<u64>,
     pub num_words: Option<u64>,
@@ -205,6 +204,7 @@ pub struct FileFullMetadata {
     pub is_inbox: bool,
     pub is_local: bool,
     pub is_trashed: bool,
+    pub file_services: FileMetadataServices,
     pub known_urls: Vec<String>,
     #[deprecated]
     pub service_names_to_statuses_to_tags: HashMap<String, HashMap<String, Vec<String>>>,
