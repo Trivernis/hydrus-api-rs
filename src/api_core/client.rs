@@ -43,6 +43,8 @@ use std::fmt::Debug;
 
 const ACCESS_KEY_HEADER: &str = "Hydrus-Client-API-Access-Key";
 const CONTENT_TYPE_HEADER: &str = "Content-Type";
+const ACCEPT_HEADER: &str = "Accept";
+
 #[cfg(feature = "cbor")]
 const CONTENT_TYPE_CBOR: &str = "application/cbor";
 #[cfg(feature = "json")]
@@ -455,6 +457,7 @@ impl Client {
             .get(format!("{}/{}", self.base_url, E::path()))
             .header(ACCESS_KEY_HEADER, &self.access_key)
             .header(CONTENT_TYPE_HEADER, content_type)
+            .header(ACCEPT_HEADER, content_type)
             .query(query)
             .query(&params)
             .send()
@@ -509,7 +512,8 @@ impl Client {
             .post(format!("{}/{}", self.base_url, E::path()))
             .body(body)
             .header(ACCESS_KEY_HEADER, &self.access_key)
-            .header("Content-Type", content_type)
+            .header(CONTENT_TYPE_HEADER, content_type)
+            .header(ACCEPT_HEADER, content_type)
             .send()
             .await?;
         let response = Self::extract_error(response).await?;
@@ -551,17 +555,24 @@ impl Client {
     #[tracing::instrument(skip(self, data), level = "trace")]
     async fn post_binary<E: Endpoint>(&self, data: Vec<u8>) -> Result<E::Response> {
         tracing::trace!("Binary POST request to {}", E::path());
+
+        #[cfg(feature = "cbor")]
+        let content_type = CONTENT_TYPE_CBOR;
+        #[cfg(feature = "json")]
+        let content_type = CONTENT_TYPE_JSON;
+
         let response = self
             .inner
             .post(format!("{}/{}", self.base_url, E::path()))
             .body(data)
             .header(ACCESS_KEY_HEADER, &self.access_key)
             .header(CONTENT_TYPE_HEADER, "application/octet-stream")
+            .header(ACCEPT_HEADER, content_type)
             .send()
             .await?;
         let response = Self::extract_error(response).await?;
 
-        response.json::<E::Response>().await.map_err(Error::from)
+        Self::extract_content(response).await
     }
 
     /// Returns an error with the response text content if the status doesn't indicate success

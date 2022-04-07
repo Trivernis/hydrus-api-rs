@@ -206,14 +206,12 @@ impl HydrusFile {
     ) -> Result<Option<NaiveDateTime>> {
         let metadata = self.metadata().await?;
         let naive_time_imported = metadata
-            .basic_metadata
             .file_services
             .current
             .get(service_key.as_ref())
             .map(|s| s.time_imported)
             .or_else(|| {
                 metadata
-                    .basic_metadata
                     .file_services
                     .deleted
                     .get(service_key.as_ref())
@@ -231,7 +229,6 @@ impl HydrusFile {
     ) -> Result<Option<NaiveDateTime>> {
         let metadata = self.metadata().await?;
         let naive_time_deleted = metadata
-            .basic_metadata
             .file_services
             .deleted
             .get(service_key.as_ref())
