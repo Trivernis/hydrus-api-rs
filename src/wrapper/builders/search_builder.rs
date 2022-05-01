@@ -123,11 +123,11 @@ impl SearchBuilder {
                 .map(|c| SearchQueryEntry::OrChain(c.into_string_list()))
                 .collect(),
         );
-        let response = client.search_files(entries, self.options).await?;
+        let response = client.search_file_hashes(entries, self.options).await?;
         let files = response
-            .file_ids
+            .hashes
             .into_iter()
-            .map(|id| HydrusFile::from_id(client.clone(), id))
+            .map(|hash| HydrusFile::from_hash(client.clone(), hash))
             .collect();
 
         Ok(files)
