@@ -43,10 +43,10 @@ pub struct HydrusFile {
 }
 
 impl HydrusFile {
-    pub(crate) fn from_id(client: Client, id: u64) -> Self {
+    pub(crate) fn from_hash<S: ToString>(client: Client, hash: S) -> Self {
         Self {
             client,
-            id: FileIdentifier::ID(id),
+            id: FileIdentifier::Hash(hash.to_string()),
             status: FileStatus::Unknown,
             metadata: None,
         }
