@@ -161,6 +161,7 @@ impl Endpoint for GetFile {
 }
 
 #[derive(Clone, Debug, Serialize)]
+#[serde(untagged)]
 pub enum SearchQueryEntry {
     Tag(String),
     OrChain(Vec<String>),
