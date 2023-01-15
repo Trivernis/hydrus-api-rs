@@ -166,3 +166,91 @@ impl AddTagsRequestBuilder {
         }
     }
 }
+
+pub struct SearchTags;
+
+impl Endpoint for SearchTags {
+    type Request = ();
+
+    type Response = SearchTagsResponse;
+
+    fn path() -> String {
+        String::from("add_tags/search_tags")
+    }
+}
+
+#[derive(Debug, Deserialize)]
+pub struct SearchTagsResponse {
+    pub tags: Vec<TagWithCount>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct TagWithCount {
+    /// The name of the tag
+    pub value: String,
+    /// The count of how many times it was found in the database
+    pub count: u64,
+}
+
+#[derive(Debug, Default)]
+pub struct TagSearchOptions {
+    /// And optional filter for the service the tags should belong to
+    pub tag_service: Option<ServiceIdentifier>,
+    /// Controls how the tags in the result should be displayed
+    pub display_type: TagDisplayType,
+}
+
+#[derive(Debug)]
+pub enum TagDisplayType {
+    /// Returns tags as stored in the hydrus database
+    Storage,
+    /// Returns tags as displayed by hydrus
+    Display,
+}
+
+impl Default for TagDisplayType {
+    fn default() -> Self {
+        Self::Storage
+    }
+}
+
+impl TagDisplayType {
+    fn to_api_string(&self) -> &'static str {
+        match self {
+            TagDisplayType::Storage => "storage",
+            TagDisplayType::Display => "display",
+        }
+    }
+}
+
+impl TagSearchOptions {
+    /// Sets the display type of the search result
+    pub fn display_type(mut self, display_type: TagDisplayType) -> Self {
+        self.display_type = display_type;
+        self
+    }
+
+    /// Adds a filter for the tag service that the tags we're searching for
+    /// should belong to.
+    pub fn tag_service(mut self, tag_service: ServiceIdentifier) -> Self {
+        self.tag_service = Some(tag_service);
+        self
+    }
+
+    pub(crate) fn into_query_args(self) -> Vec<(&'static str, String)> {
+        let mut args = Vec::new();
+
+        if let Some(service) = self.tag_service {
+            match service {
+                ServiceIdentifier::Name(name) => args.push(("tag_service_name", name)),
+                ServiceIdentifier::Key(key) => args.push(("tag_service_key", key)),
+            }
+        }
+        args.push((
+            "tag_display_type",
+            self.display_type.to_api_string().to_string(),
+        ));
+
+        args
+    }
+}

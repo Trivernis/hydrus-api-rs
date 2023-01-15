@@ -41,6 +41,8 @@ use serde::Serialize;
 use std::collections::HashMap;
 use std::fmt::Debug;
 
+use super::endpoints::adding_tags::{SearchTags, SearchTagsResponse, TagSearchOptions};
+
 const ACCESS_KEY_HEADER: &str = "Hydrus-Client-API-Access-Key";
 const CONTENT_TYPE_HEADER: &str = "Content-Type";
 const ACCEPT_HEADER: &str = "Accept";
@@ -194,6 +196,19 @@ impl Client {
         self.post::<AddTags>(request).await?;
 
         Ok(())
+    }
+
+    /// Searches for tags by name
+    #[tracing::instrument(skip(self), level = "debug")]
+    pub async fn search_tags<S: ToString + Debug>(
+        &self,
+        query: S,
+        options: TagSearchOptions,
+    ) -> Result<SearchTagsResponse> {
+        let mut args = options.into_query_args();
+        args.push(("search", query.to_string()));
+        self.get_and_parse::<SearchTags, [(&str, String)]>(&args)
+            .await
     }
 
     /// Searches for files

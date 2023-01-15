@@ -1,7 +1,9 @@
 use super::super::common;
 use crate::common::test_data::EMPTY_HASH;
 use hydrus_api::api_core::common::ServiceIdentifier;
-use hydrus_api::api_core::endpoints::adding_tags::{AddTagsRequestBuilder, TagAction};
+use hydrus_api::api_core::endpoints::adding_tags::{
+    AddTagsRequestBuilder, TagAction, TagDisplayType, TagSearchOptions,
+};
 
 #[tokio::test]
 async fn it_cleans_tags() {
@@ -35,4 +37,21 @@ async fn it_adds_tags() {
         )
         .build();
     client.add_tags(request).await.unwrap();
+}
+
+/// This test requires that searching for "*" is permitted in hydrus
+#[tokio::test]
+async fn it_searches_for_tags() {
+    #![allow(deprecated)]
+    let client = common::get_client();
+    let response = client
+        .search_tags(
+            "*",
+            TagSearchOptions::default()
+                .display_type(TagDisplayType::Display)
+                .tag_service(ServiceIdentifier::name("public tag repository")),
+        )
+        .await
+        .unwrap();
+    assert!(response.tags.is_empty() == false)
 }
