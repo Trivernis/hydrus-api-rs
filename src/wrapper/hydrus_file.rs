@@ -7,7 +7,7 @@ use crate::error::{Error, Result};
 use crate::utils::tag_list_to_string_list;
 use crate::wrapper::builders::delete_files_builder::DeleteFilesBuilder;
 use crate::wrapper::builders::notes_builder::AddNotesBuilder;
-use crate::wrapper::service::ServiceName;
+
 use crate::wrapper::tag::Tag;
 use crate::Client;
 use chrono::{NaiveDateTime, TimeZone, Utc};
@@ -289,18 +289,19 @@ impl HydrusFile {
     ///
     /// Deprecation: Use [HydrusFile::services_with_tags] instead.
     #[deprecated(note = "Deprecated in the official API. Use services_with_tags instead.")]
-    pub async fn service_names_with_tags(&mut self) -> Result<HashMap<ServiceName, Vec<Tag>>> {
+    pub async fn service_names_with_tags(
+        &mut self,
+    ) -> Result<HashMap<ServiceIdentifier, Vec<Tag>>> {
         let metadata = self.metadata().await?;
         let mut tag_mappings = HashMap::new();
 
-        #[allow(deprecated)]
-        for (service, status_tags) in &metadata.service_names_to_statuses_to_tags {
+        for (service, status_tags) in &metadata.service_keys_to_statuses_to_tags {
             let mut tag_list = Vec::new();
 
             for (_, tags) in status_tags {
                 tag_list.append(&mut tags.into_iter().map(|t| t.into()).collect())
             }
-            tag_mappings.insert(ServiceName(service.clone()), tag_list);
+            tag_mappings.insert(ServiceIdentifier::Key(service.clone()), tag_list);
         }
 
         Ok(tag_mappings)

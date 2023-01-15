@@ -207,11 +207,7 @@ pub struct FileFullMetadata {
     pub is_trashed: bool,
     pub file_services: FileMetadataServices,
     pub known_urls: Vec<String>,
-    #[deprecated]
-    pub service_names_to_statuses_to_tags: HashMap<String, HashMap<String, Vec<String>>>,
     pub service_keys_to_statuses_to_tags: HashMap<String, HashMap<String, Vec<String>>>,
-    #[deprecated]
-    pub service_names_to_statuses_to_display_tags: HashMap<String, HashMap<String, Vec<String>>>,
     pub service_keys_to_statuses_to_display_tags: HashMap<String, HashMap<String, Vec<String>>>,
 }
 
