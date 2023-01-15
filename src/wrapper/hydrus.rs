@@ -14,6 +14,8 @@ use crate::wrapper::version::Version;
 use crate::Client;
 use std::fmt::Debug;
 
+use super::builders::tag_search_builder::TagSearchBuilder;
+
 /// A high level wrapper for the hydrus API for easier management of files, tags
 /// urls etc.
 pub struct Hydrus {
@@ -92,6 +94,11 @@ impl Hydrus {
     /// Starts a request to search for files
     pub fn search(&self) -> SearchBuilder {
         SearchBuilder::new(self.client.clone())
+    }
+
+    /// Starts a search request for tags with additional filter options
+    pub fn search_tags<S: ToString>(&self, query: S) -> TagSearchBuilder {
+        TagSearchBuilder::new(self.client.clone(), query.to_string())
     }
 
     /// Returns a hydrus page by page key

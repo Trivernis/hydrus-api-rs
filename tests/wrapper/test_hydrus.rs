@@ -78,3 +78,9 @@ async fn it_sets_the_user_agent() {
         .await
         .unwrap();
 }
+
+#[tokio::test]
+async fn it_searches_for_tags() {
+    let hydrus = common::get_hydrus();
+    hydrus.search_tags("t").as_displayed().run().await.unwrap();
+}
