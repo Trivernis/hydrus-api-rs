@@ -1,6 +1,6 @@
-use crate::api_core::common::FileIdentifier;
+use crate::api_core::common::{FileIdentifier, ServiceIdentifier};
 use crate::api_core::endpoints::searching_and_fetching_files::FullMetadata;
-use crate::error::Result;
+use crate::error::{Error, Result};
 use crate::wrapper::address::Address;
 use crate::wrapper::builders::delete_files_builder::DeleteFilesBuilder;
 use crate::wrapper::builders::import_builder::ImportBuilder;
@@ -124,5 +124,26 @@ impl Hydrus {
     /// Sets the user agent hydrus uses for http requests
     pub async fn set_user_agent<S: ToString + Debug>(&self, user_agent: S) -> Result<()> {
         self.client.set_user_agent(user_agent).await
+    }
+
+    /// Returns the key for a given service identifier
+    pub async fn get_service_key(&self, service: ServiceIdentifier) -> Result<String> {
+        let key = match service {
+            ServiceIdentifier::Name(n) => self
+                .client
+                .get_services()
+                .await?
+                .other
+                .values()
+                .flatten()
+                .filter(|v| *v.name == n)
+                .next()
+                .ok_or_else(|| Error::Hydrus(String::from("Service not found")))?
+                .service_key
+                .clone(),
+            ServiceIdentifier::Key(k) => k,
+        };
+
+        Ok(key)
     }
 }
