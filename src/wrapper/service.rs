@@ -135,7 +135,7 @@ pub struct Services {
 impl Services {
     /// Creates the services list from a given hydrus response
     pub fn from_response(client: Client, response: GetServicesResponse) -> Self {
-        let mut response = response.0;
+        let mut response = response.other;
         let mut mapped_types = HashMap::with_capacity(response.keys().len());
         let keys = response.keys().cloned().collect::<Vec<String>>().clone();
 

@@ -6,6 +6,17 @@ use std::collections::HashMap;
 pub struct BasicServiceInfo {
     pub name: String,
     pub service_key: String,
+    #[serde(alias = "type")]
+    pub service_type: u64,
+    pub type_pretty: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ServiceItem {
+    pub name: String,
+    #[serde(alias = "type")]
+    pub service_type: u64,
+    pub type_pretty: String,
 }
 
 impl BasicServiceInfo {
@@ -200,6 +211,10 @@ pub struct FileMetadataServices {
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct FileMetadataServiceCurrent {
+    pub name: String,
+    #[serde(alias = "type")]
+    pub service_type: u64,
+    pub type_pretty: String,
     pub time_imported: u64,
 }
 

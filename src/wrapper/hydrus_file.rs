@@ -295,10 +295,10 @@ impl HydrusFile {
         let metadata = self.metadata().await?;
         let mut tag_mappings = HashMap::new();
 
-        for (service, status_tags) in &metadata.service_keys_to_statuses_to_tags {
+        for (service, service_tags) in &metadata.tags {
             let mut tag_list = Vec::new();
 
-            for (_, tags) in status_tags {
+            for (_, tags) in &service_tags.storage_tags {
                 tag_list.append(&mut tags.into_iter().map(|t| t.into()).collect())
             }
             tag_mappings.insert(ServiceIdentifier::Key(service.clone()), tag_list);
@@ -312,10 +312,10 @@ impl HydrusFile {
         let metadata = self.metadata().await?;
         let mut tag_mappings = HashMap::new();
 
-        for (service, status_tags) in &metadata.service_keys_to_statuses_to_tags {
+        for (service, service_tags) in &metadata.tags {
             let mut tag_list = Vec::new();
 
-            for (_, tags) in status_tags {
+            for (_, tags) in &service_tags.storage_tags {
                 tag_list.append(&mut tags.into_iter().map(|t| t.into()).collect())
             }
             tag_mappings.insert(ServiceIdentifier::Key(service.clone()), tag_list);

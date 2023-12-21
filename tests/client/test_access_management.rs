@@ -27,5 +27,5 @@ async fn it_verifies_the_access_key() {
 async fn it_returns_a_list_of_services() {
     let client = common::get_client();
     let services_response = client.get_services().await.unwrap();
-    assert!(services_response.0.keys().len() > 0);
+    assert!(services_response.other.keys().len() > 0);
 }

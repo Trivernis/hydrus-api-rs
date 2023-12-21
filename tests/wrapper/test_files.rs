@@ -70,7 +70,7 @@ async fn it_modifies_tags() {
     let mut file = get_file().await;
     file.modify_tags(
         ServiceName::my_tags().into(),
-        TagAction::RescindPendFromRepository,
+        TagAction::DeleteFromLocalService,
         vec!["ark mage".into()],
     )
     .await

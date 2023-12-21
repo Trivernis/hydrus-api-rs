@@ -49,7 +49,7 @@ async fn it_searches_for_tags() {
             "*",
             TagSearchOptions::default()
                 .display_type(TagDisplayType::Display)
-                .tag_service(ServiceIdentifier::name("public tag repository")),
+                .tag_service(ServiceIdentifier::name("all known tags")),
         )
         .await
         .unwrap();

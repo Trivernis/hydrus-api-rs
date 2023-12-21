@@ -52,7 +52,7 @@ async fn it_fetches_file_metadata() {
     client
         .get_file_metadata::<FullMetadata>(
             vec![],
-            vec!["0000000000000000000000000000000000000000000000000000000000000000".to_string()],
+            vec!["9641a590e66d9f2e5137b6bcba07fdf6cec3ffaa54de2565c3afcc2125ad1160".to_string()],
         )
         .await
         .unwrap();

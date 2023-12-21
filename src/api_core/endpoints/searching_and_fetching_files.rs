@@ -207,8 +207,18 @@ pub struct FileFullMetadata {
     pub is_trashed: bool,
     pub file_services: FileMetadataServices,
     pub known_urls: Vec<String>,
-    pub service_keys_to_statuses_to_tags: HashMap<String, HashMap<String, Vec<String>>>,
-    pub service_keys_to_statuses_to_display_tags: HashMap<String, HashMap<String, Vec<String>>>,
+    /// map of service keys to tags
+    pub tags: HashMap<String, ServiceTags>,
+}
+
+#[derive(Clone, Debug, Default, Deserialize)]
+pub struct ServiceTags {
+    pub name: String,
+    #[serde(alias = "type")]
+    pub service_type: u64,
+    pub type_pretty: String,
+    pub storage_tags: HashMap<String, Vec<String>>,
+    pub display_tags: HashMap<String, Vec<String>>,
 }
 
 pub trait FileMetadataType: Clone + Debug {

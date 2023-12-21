@@ -1,4 +1,4 @@
-use crate::api_core::common::BasicServiceInfo;
+use crate::api_core::common::{BasicServiceInfo, ServiceItem};
 use crate::api_core::endpoints::Endpoint;
 use std::collections::HashMap;
 
@@ -62,7 +62,13 @@ impl Endpoint for VerifyAccessKey {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-pub struct GetServicesResponse(pub HashMap<String, Vec<BasicServiceInfo>>);
+pub struct GetServicesResponse {
+    pub services: HashMap<String, ServiceItem>,
+    pub version: u64,
+    pub hydrus_version: u64,
+    #[serde(flatten)]
+    pub other: HashMap<String, Vec<BasicServiceInfo>>,
+}
 
 pub struct GetServices;
 
