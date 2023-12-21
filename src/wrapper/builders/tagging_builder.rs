@@ -1,6 +1,6 @@
 use crate::api_core::common::ServiceIdentifier;
 use crate::api_core::endpoints::adding_tags::{AddTagsRequestBuilder, TagAction};
-use crate::error::Result;
+use crate::error::{Error, Result};
 use crate::wrapper::tag::Tag;
 use crate::Client;
 use std::collections::HashMap;
@@ -59,10 +59,25 @@ impl TaggingBuilder {
     pub async fn run(self) -> Result<()> {
         let mut request = AddTagsRequestBuilder::default().add_hashes(self.hashes);
         for (service, action_tag_mappings) in self.tag_mappings {
+            let service_key = match service {
+                ServiceIdentifier::Name(n) => self
+                    .client
+                    .get_services()
+                    .await?
+                    .other
+                    .values()
+                    .flatten()
+                    .filter(|v| *v.name == n)
+                    .next()
+                    .ok_or_else(|| Error::Hydrus(String::from("Service not found")))?
+                    .service_key
+                    .clone(),
+                ServiceIdentifier::Key(k) => k,
+            };
             for (action, tags) in action_tag_mappings {
                 for tag in tags {
                     request = request.add_tag_with_action(
-                        service.clone().into(),
+                        service_key.clone(),
                         tag.to_string(),
                         action.clone(),
                     );

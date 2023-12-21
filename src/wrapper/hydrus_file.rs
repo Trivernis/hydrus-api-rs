@@ -337,11 +337,11 @@ impl HydrusFile {
     }
 
     /// Adds tags for a specific service to the file
-    pub async fn add_tags(&mut self, service: ServiceIdentifier, tags: Vec<Tag>) -> Result<()> {
+    pub async fn add_tags(&mut self, service_key: String, tags: Vec<Tag>) -> Result<()> {
         let hash = self.hash().await?;
         let request = AddTagsRequestBuilder::default()
             .add_hash(hash)
-            .add_tags(service, tag_list_to_string_list(tags))
+            .add_tags(service_key, tag_list_to_string_list(tags))
             .build();
 
         self.client.add_tags(request).await
@@ -350,7 +350,7 @@ impl HydrusFile {
     /// Allows modification of tags by using the defined tag actions
     pub async fn modify_tags(
         &mut self,
-        service: ServiceIdentifier,
+        service_key: String,
         action: TagAction,
         tags: Vec<Tag>,
     ) -> Result<()> {
@@ -358,7 +358,8 @@ impl HydrusFile {
         let mut reqwest = AddTagsRequestBuilder::default().add_hash(hash);
 
         for tag in tags {
-            reqwest = reqwest.add_tag_with_action(service.clone(), tag.to_string(), action.clone());
+            reqwest =
+                reqwest.add_tag_with_action(service_key.clone(), tag.to_string(), action.clone());
         }
 
         self.client.add_tags(reqwest.build()).await

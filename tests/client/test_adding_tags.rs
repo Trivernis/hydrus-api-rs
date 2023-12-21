@@ -27,11 +27,11 @@ async fn it_adds_tags() {
     let request = AddTagsRequestBuilder::default()
         .add_hash(EMPTY_HASH) // valid hash, I hope no files are affected
         .add_tags(
-            ServiceIdentifier::name("my tags"),
+            "6c6f63616c2074616773".into(),
             vec!["beach".into(), "summer".into()],
         )
         .add_tag_with_action(
-            ServiceIdentifier::name("my tags"),
+            "6c6f63616c2074616773".into(),
             "rain",
             TagAction::DeleteFromLocalService,
         )

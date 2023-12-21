@@ -21,9 +21,7 @@ impl Endpoint for CleanTags {
 #[derive(Debug, Clone, Serialize)]
 pub struct AddTagsRequest {
     pub hashes: Vec<String>,
-    pub service_names_to_tags: HashMap<String, Vec<String>>,
     pub service_keys_to_tags: HashMap<String, Vec<String>>,
-    pub service_names_to_actions_to_tags: HashMap<String, HashMap<String, Vec<String>>>,
     pub service_keys_to_actions_to_tags: HashMap<String, HashMap<String, Vec<String>>>,
 }
 
@@ -41,9 +39,7 @@ impl Endpoint for AddTags {
 #[derive(Default)]
 pub struct AddTagsRequestBuilder {
     hashes: Vec<String>,
-    service_names_to_tags: HashMap<String, Vec<String>>,
     service_keys_to_tags: HashMap<String, Vec<String>>,
-    service_names_to_actions_to_tags: HashMap<String, HashMap<String, Vec<String>>>,
     service_keys_to_actions_to_tags: HashMap<String, HashMap<String, Vec<String>>>,
 }
 
@@ -100,11 +96,8 @@ impl AddTagsRequestBuilder {
     }
 
     /// Adds a single tag for a given service
-    pub fn add_tag<S: AsRef<str>>(mut self, service_id: ServiceIdentifier, tag: S) -> Self {
-        let (service, relevant_mappings) = match service_id {
-            ServiceIdentifier::Name(name) => (name, &mut self.service_names_to_tags),
-            ServiceIdentifier::Key(key) => (key, &mut self.service_keys_to_tags),
-        };
+    pub fn add_tag<S: AsRef<str>>(mut self, service_key: String, tag: S) -> Self {
+        let (service, relevant_mappings) = (service_key, &mut self.service_keys_to_tags);
         if let Some(mappings) = relevant_mappings.get_mut(&service) {
             mappings.push(tag.as_ref().into())
         } else {
@@ -115,11 +108,8 @@ impl AddTagsRequestBuilder {
     }
 
     /// Adds multiple tags for a given service
-    pub fn add_tags(mut self, service_id: ServiceIdentifier, mut tags: Vec<String>) -> Self {
-        let (service, relevant_mappings) = match service_id {
-            ServiceIdentifier::Name(name) => (name, &mut self.service_names_to_tags),
-            ServiceIdentifier::Key(key) => (key, &mut self.service_keys_to_tags),
-        };
+    pub fn add_tags(mut self, service_key: String, mut tags: Vec<String>) -> Self {
+        let (service, relevant_mappings) = (service_key, &mut self.service_keys_to_tags);
         if let Some(mappings) = relevant_mappings.get_mut(&service) {
             mappings.append(&mut tags);
         } else {
@@ -132,14 +122,11 @@ impl AddTagsRequestBuilder {
     /// Adds one tag for a given service with a defined action
     pub fn add_tag_with_action<S: AsRef<str>>(
         mut self,
-        service_id: ServiceIdentifier,
+        service_key: String,
         tag: S,
         action: TagAction,
     ) -> Self {
-        let (service, relevant_mappings) = match service_id {
-            ServiceIdentifier::Name(name) => (name, &mut self.service_names_to_actions_to_tags),
-            ServiceIdentifier::Key(key) => (key, &mut self.service_keys_to_actions_to_tags),
-        };
+        let (service, relevant_mappings) = (service_key, &mut self.service_keys_to_actions_to_tags);
         let action_id = action.into_id();
         if let Some(actions) = relevant_mappings.get_mut(&service) {
             if let Some(tags) = actions.get_mut(&action_id.to_string()) {
@@ -159,9 +146,7 @@ impl AddTagsRequestBuilder {
     pub fn build(self) -> AddTagsRequest {
         AddTagsRequest {
             hashes: self.hashes,
-            service_names_to_tags: self.service_names_to_tags,
             service_keys_to_tags: self.service_keys_to_tags,
-            service_names_to_actions_to_tags: self.service_names_to_actions_to_tags,
             service_keys_to_actions_to_tags: self.service_keys_to_actions_to_tags,
         }
     }
